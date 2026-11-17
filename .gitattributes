@@ -1,0 +1,10 @@
+# 统一换行符（Linux 容器部署）
+* text=auto eol=lf
+
+# 二进制文件
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.webp binary
+*.ico binary
+*.gif binary
