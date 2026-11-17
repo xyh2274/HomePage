@@ -553,12 +553,43 @@
 
             .card h4 { margin-top: 20px !important; font-size: 12px; letter-spacing: 2px; }
 
-            /* 手机上浮动按钮改为文档流内，避免压住图标 */
+            /* 手机上固定到左侧垂直居中：拇指好够，且避开图标列 */
             .dock {
-                position: static;
+                position: fixed;
+                left: 4px;
+                top: 50%;
+                right: auto;
+                bottom: auto;
+                transform: translateY(-50%);
+                flex-direction: column;
+                gap: 10px;
+                margin: 0;
+                padding: 0;
+                z-index: 30;
+            }
+
+            .theme-toggle {
+                width: 32px;
+                height: 32px;
+                font-size: 13px;
+                box-shadow: 0 3px 10px rgba(40, 70, 95, 0.18);
+            }
+
+            .admin-entry {
+                width: 32px;
+                height: 32px;
+                padding: 0;
+                font-size: 0;              /* 隐藏「管理」文字 */
+                border-radius: 50%;
+                display: inline-flex;
+                align-items: center;
                 justify-content: center;
-                margin: 16px 0 4px;
-                padding-bottom: env(safe-area-inset-bottom);
+                box-shadow: 0 3px 10px rgba(40, 70, 95, 0.18);
+            }
+
+            .admin-entry::after {
+                content: '⚙';
+                font-size: 14px;
             }
         }
     </style>
