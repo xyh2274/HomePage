@@ -560,7 +560,26 @@
                 margin-bottom: 12px;
             }
 
-            .nav-panel { padding: 14px 8px 8px; border-radius: 14px; }
+            .nav-panel {
+                padding: 14px 8px 8px;
+                border-radius: 14px;
+                /* 服务多时区域内部滚动，不把页面撑太长 */
+                max-height: 56vh;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(95, 158, 160, 0.45) transparent;
+            }
+
+            .nav-panel::-webkit-scrollbar { width: 4px; }
+
+            .nav-panel::-webkit-scrollbar-thumb {
+                background: rgba(95, 158, 160, 0.45);
+                border-radius: 2px;
+            }
+
+            .nav-panel::-webkit-scrollbar-track { background: transparent; }
             .nav-grid { gap: 26px; max-width: 100%; }
             .nav-row { gap: 6px; }
             .nav-item {
