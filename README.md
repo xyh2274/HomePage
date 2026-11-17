@@ -1,10 +1,10 @@
-# HomePage · ArcoIris 导航页
+# HomePage
 
-> 一个保持原美术风格的 NAS 导航页，带可视化管理后台。
+一个轻量级的 NAS 导航页，带可视化管理后台。
 
 ![导航页](https://cdn.jsdelivr.net/gh/xyh2274/tuchuang@main/HomePage/screenshot-light.webp)
 
-前身是一份纯静态 HTML（`legacy/` 里留着原样），加个服务要改代码、传文件、重启。现在服务列表存 SQLite，通过 `/admin` 网页增删改，**前台视觉完全没有改动**。
+服务列表存在 SQLite 里，通过 `/admin` 网页增删改，加一个服务不需要碰代码。前端是玻璃拟态风格，支持明暗双主题、图标自动抓取、服务在线状态。
 
 ---
 
