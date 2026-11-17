@@ -217,6 +217,7 @@
             font-weight: 700;
             letter-spacing: .3px;
             text-shadow: 0 1px 2px var(--text-halo);
+            text-wrap: balance;          /* 多行时两端长度更接近，避免孤字成行 */
             transition: color .3s ease;
         }
 
@@ -480,7 +481,7 @@
             #main.container {
                 padding-left: 10px;
                 padding-right: 10px;
-                padding-bottom: calc(env(safe-area-inset-bottom) + 18px);
+                padding-bottom: calc(env(safe-area-inset-bottom) + 22px);
             }
 
             .row.my-card {
@@ -521,7 +522,14 @@
             .nav-name { font-size: 12.5px; }
 
             .card h4 { margin-top: 20px !important; font-size: 12px; letter-spacing: 2px; }
-            .dock { right: 12px; bottom: calc(env(safe-area-inset-bottom) + 10px); }
+
+            /* 手机上浮动按钮改为文档流内，避免压住图标 */
+            .dock {
+                position: static;
+                justify-content: center;
+                margin: 16px 0 4px;
+                padding-bottom: env(safe-area-inset-bottom);
+            }
         }
     </style>
 </head>
