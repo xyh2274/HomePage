@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>登录 · ArcoIris</title>
+    <script>
+        (function () {
+            var t = localStorage.getItem('arco-iris-theme');
+            if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+
+        :root {
+            --veil: rgba(255, 255, 255, 0.16);
+            --card-bg: rgba(255, 255, 255, 0.44);
+            --card-border: rgba(255, 255, 255, 0.58);
+            --card-shadow: 0 30px 68px rgba(30, 52, 68, 0.20);
+            --text: #1f2f39;
+            --text-dim: #5c7078;
+            --input-bg: rgba(255, 255, 255, 0.58);
+            --input-border: rgba(255, 255, 255, 0.82);
+            --input-focus-bg: rgba(255, 255, 255, 0.88);
+            --accent: #5f9ea0;
+            --accent-hover: #4f8b8d;
+            --accent-shadow: rgba(60, 100, 105, 0.26);
+        }
+
+        html[data-theme="dark"] {
+            --veil: rgba(8, 12, 16, 0.56);
+            --card-bg: rgba(22, 28, 34, 0.64);
+            --card-border: rgba(255, 255, 255, 0.10);
+            --card-shadow: 0 30px 68px rgba(0, 0, 0, 0.48);
+            --text: #e4edf2;
+            --text-dim: #9db0bb;
+            --input-bg: rgba(255, 255, 255, 0.07);
+            --input-border: rgba(255, 255, 255, 0.12);
+            --input-focus-bg: rgba(255, 255, 255, 0.13);
+            --accent: #67a8aa;
+            --accent-hover: #79bcbe;
+            --accent-shadow: rgba(0, 0, 0, 0.40);
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 18px;
+            min-height: 100vh;
+            min-height: 100dvh;
+            background-color: #ebf1f5;
+            background-image:
+                linear-gradient(var(--veil), var(--veil)),
+                url(/Selenabj.jpg);
+            background-position: center center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC",
+                         system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            transition: color .25s ease;
+        }
+
+        .box {
+            width: 100%;
+            max-width: 352px;
+            padding: 36px 30px 24px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px) saturate(140%);
+            -webkit-backdrop-filter: blur(16px) saturate(140%);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            transition: background .25s ease, border-color .25s ease;
+        }
+
+        .theme-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+            color: var(--text-dim);
+            background: transparent;
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform .2s ease, color .2s ease;
+        }
+
+        .theme-btn:hover { transform: rotate(-18deg); color: var(--accent); }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: var(--text);
+        }
+
+        .brand .sub {
+            display: block;
+            margin-top: 8px;
+            font-family: "Kaiti SC", "KaiTi", "STKaiti", "楷体", serif;
+            font-size: 13px;
+            letter-spacing: 4px;
+            color: var(--text-dim);
+        }
+
+        input[type=password] {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 15px;
+            color: var(--text);
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            outline: none;
+            transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+        }
+
+        input[type=password]::placeholder { color: var(--text-dim); opacity: .7; }
+
+        input[type=password]:focus {
+            background: var(--input-focus-bg);
+            border-color: rgba(95, 158, 160, 0.62);
+            box-shadow: 0 0 0 4px rgba(95, 158, 160, 0.15);
+        }
+
+        button.submit {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            color: #fff;
+            background: var(--accent);
+            border: 0;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 6px 16px var(--accent-shadow);
+            transition: background .2s ease, box-shadow .2s ease, transform .15s ease;
+        }
+
+        button.submit:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 9px 22px var(--accent-shadow);
+        }
+
+        button.submit:active { transform: translateY(1px); }
+
+        .err {
+            margin: 14px 0 0;
+            padding: 9px 12px;
+            font-size: 13px;
+            color: #a7392f;
+            background: rgba(224, 131, 123, 0.14);
+            border: 1px solid rgba(224, 131, 123, 0.32);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        html[data-theme="dark"] .err { color: #f0a19a; }
+
+        .back {
+            display: block;
+            margin-top: 18px;
+            font-size: 12.5px;
+            color: var(--text-dim);
+            text-align: center;
+            text-decoration: none;
+            transition: color .18s ease;
+        }
+
+        .back:hover { color: var(--accent); text-decoration: none; }
+    </style>
+</head>
+
+<body>
+    <form class="box" method="post">
+        <button class="theme-btn" type="button" id="themeBtn" title="切换主题">◐</button>
+
+        <div class="brand">
+            <h1>ArcoIris</h1>
+            <span class="sub">管理后台</span>
+        </div>
+
+        <input type="password" name="password" placeholder="请输入管理密码" autofocus required>
+        <button class="submit" type="submit">进入后台</button>
+        {% if err %}<p class="err">{{ err }}</p>{% endif %}
+        <a class="back" href="/">← 返回导航页</a>
+    </form>
+
+    <script>
+        var root = document.documentElement;
+
+        function applyTheme(t) {
+            root.setAttribute('data-theme', t);
+            localStorage.setItem('arco-iris-theme', t);
+            document.getElementById('themeBtn').textContent = t === 'dark' ? '☀' : '◐';
+        }
+
+        document.getElementById('themeBtn').onclick = function () {
+            applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        };
+
+        applyTheme(root.getAttribute('data-theme') || 'light');
+    </script>
+</body>
+
+</html>

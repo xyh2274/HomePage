@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
+    <title>ArcoIris</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <link rel="icon" type="image/ico" href="/favicon.ico">
+    <script>
+        (function () {
+            var t = localStorage.getItem('arco-iris-theme');
+            if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/5.12.1/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        /* ============================================
+           主题变量：light / dark
+           ============================================ */
+        :root {
+            --veil: rgba(255, 255, 255, 0.05);
+            --card-bg: rgba(8, 12, 16, 0.14);
+            --row-tint: rgba(255, 255, 255, 0.06);
+            --row-shadow: 0 34px 80px rgba(10, 20, 30, 0.30), 0 8px 22px rgba(10, 20, 30, 0.12);
+            --head-shadow: rgba(255, 255, 255, 0.16);
+
+            --text: #263640;
+            --text-strong: #16242e;
+            --text-mid: #1c3140;
+            --text-name: #22323c;
+            --text-soft: #142029;
+            --text-halo: rgba(255, 255, 255, 0.78);
+
+            --panel-bg: rgba(255, 255, 255, 0.24);
+            --panel-border: rgba(255, 255, 255, 0.50);
+            --panel-shadow: 0 4px 16px rgba(50, 72, 88, 0.07);
+            --panel-halo: rgba(255, 255, 255, 0.55);
+
+            --search-bg: rgba(255, 255, 255, 0.52);
+            --search-border: rgba(255, 255, 255, 0.75);
+            --search-focus-bg: rgba(255, 255, 255, 0.78);
+            --search-text: #24333d;
+
+            --hover-bg: rgba(255, 255, 255, 0.48);
+            --chip-bg: rgba(255, 255, 255, 0.74);
+            --chip-border: rgba(255, 255, 255, 0.84);
+            --chip-text: #1b2a33;
+        }
+
+        html[data-theme="dark"] {
+            --veil: rgba(6, 10, 14, 0.38);
+            --card-bg: rgba(12, 16, 20, 0.52);
+            --row-tint: rgba(255, 255, 255, 0.03);
+            --row-shadow: 0 34px 80px rgba(0, 0, 0, 0.48), 0 8px 22px rgba(0, 0, 0, 0.26);
+            --head-shadow: rgba(255, 255, 255, 0.08);
+
+            --text: #dfe9ef;
+            --text-strong: #f2f8fb;
+            --text-mid: #d3e0e7;
+            --text-name: #e2ecf2;
+            --text-soft: #c6d4dc;
+            --text-halo: rgba(0, 0, 0, 0.55);
+
+            --panel-bg: rgba(255, 255, 255, 0.055);
+            --panel-border: rgba(255, 255, 255, 0.10);
+            --panel-shadow: 0 4px 18px rgba(0, 0, 0, 0.24);
+            --panel-halo: rgba(255, 255, 255, 0.08);
+
+            --search-bg: rgba(255, 255, 255, 0.10);
+            --search-border: rgba(255, 255, 255, 0.14);
+            --search-focus-bg: rgba(255, 255, 255, 0.16);
+            --search-text: #eaf2f7;
+
+            --hover-bg: rgba(255, 255, 255, 0.09);
+            --chip-bg: rgba(255, 255, 255, 0.12);
+            --chip-border: rgba(255, 255, 255, 0.18);
+            --chip-text: #e4edf2;
+        }
+
+        /* ===== 背景 ===== */
+        body {
+            background-image:
+                linear-gradient(var(--veil), var(--veil)),
+                url(/Selenabj.jpg);
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        /* ===== 内容层 ===== */
+        .card {
+            opacity: 1 !important;
+            background: var(--card-bg) !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            backdrop-filter: blur(4px) saturate(115%);
+            -webkit-backdrop-filter: blur(4px) saturate(115%);
+            color: var(--text);
+            text-shadow: 0 1px 2px var(--text-halo);
+            transition: background .3s ease, color .3s ease;
+        }
+
+        /* ===== 整体圆角卡 ===== */
+        .row.my-card {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: stretch;
+            border-radius: 20px !important;
+            overflow: hidden;
+            background: var(--row-tint);
+            box-shadow: var(--row-shadow), inset 0 1px 0 var(--head-shadow) !important;
+            transition: box-shadow .3s ease, background .3s ease;
+        }
+
+        /* 照片：固定宽度，清零 col 内边距 */
+        .row.my-card > .col-lg-4.photo-bg {
+            flex: 0 0 272px;
+            width: 272px;
+            max-width: 272px;
+            padding: 0 !important;
+            margin: 0 !important;
+            background-image: url(/side.jpg) !important;
+            background-position: center center;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        .row.my-card > .col-lg-8.card {
+            flex: 1 1 auto;
+            width: auto;
+            max-width: none;
+            padding: 44px 42px 40px !important;
+        }
+
+        /* ===== 搜索框 ===== */
+        .searchBox {
+            width: 84%;
+            height: 42px;
+            border: 1px solid var(--search-border);
+            border-radius: 11px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            background: var(--search-bg);
+            backdrop-filter: blur(6px) saturate(130%);
+            -webkit-backdrop-filter: blur(6px) saturate(130%);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), inset 0 1px 0 var(--panel-halo);
+            transition: background .22s ease, box-shadow .22s ease, border-color .22s ease;
+        }
+
+        .searchBox:focus-within {
+            background: var(--search-focus-bg);
+            border-color: rgba(95, 158, 160, 0.65);
+            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.10), 0 0 0 4px rgba(95, 158, 160, 0.16);
+        }
+
+        .inputBox {
+            border: none;
+            width: 84%;
+            height: 40px;
+            line-height: 40px;
+            outline: none;
+            padding-left: 16px;
+            caret-color: #2b7a7d;
+            font-size: 15px;
+            color: var(--search-text);
+            background: transparent;
+            text-shadow: none;
+            transition: color .3s ease;
+        }
+
+        .inputBox::placeholder { color: var(--text-mid); opacity: .5; }
+
+        .searchBtn {
+            width: 86px;
+            height: 42px;
+            border: none;
+            position: absolute;
+            right: 0;
+            top: 0;
+            outline: none;
+            color: #fff;
+            font-size: 14.5px;
+            font-weight: 500;
+            letter-spacing: .5px;
+            background: rgba(95, 158, 160, 0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            cursor: pointer;
+            transition: background .18s ease;
+        }
+
+        .searchBtn:hover { background: rgba(108, 175, 177, 0.96); }
+
+        /* ===== 诗句 ===== */
+        .poem {
+            text-align: center;
+            margin: 34px 0 30px;
+        }
+
+        .poem .en {
+            display: block;
+            font-family: Georgia, "Palatino Linotype", "Times New Roman", serif;
+            font-style: italic;
+            font-size: 17.5px;
+            line-height: 1.8;
+            color: var(--text-strong);
+            font-weight: 700;
+            letter-spacing: .3px;
+            text-shadow: 0 1px 2px var(--text-halo);
+            transition: color .3s ease;
+        }
+
+        .poem .cn {
+            display: block;
+            font-family: "Kaiti SC", "KaiTi", "STKaiti", "楷体",
+                         "FangSong", "STFangsong", "Songti SC", serif;
+            font-size: 17.5px;
+            line-height: 2.1;
+            color: var(--text-mid);
+            font-weight: 700;
+            letter-spacing: 5px;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            text-shadow: 0 1px 2px var(--text-halo);
+            transition: color .3s ease;
+        }
+
+        .poem .pair:last-child .cn { margin-bottom: 0; }
+
+        /* ===== 导航面板 ===== */
+        .nav-panel {
+            margin-top: 10px;
+            padding: 16px 12px 8px;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 14px;
+            box-shadow: var(--panel-shadow), inset 0 1px 0 var(--panel-halo);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            transition: background .3s ease, border-color .3s ease;
+        }
+
+        /* ===== 导航：按行分组 ===== */
+        .nav-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .nav-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            flex: 1 1 0;
+            min-width: 0;
+            max-width: 98px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 9px;
+            padding: 12px 4px 10px;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: background .2s ease, transform .2s ease;
+        }
+
+        .nav-item:hover {
+            background: var(--hover-bg);
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        .nav-item:focus-visible {
+            outline: 2px solid rgba(95, 158, 160, 0.7);
+            outline-offset: 2px;
+        }
+
+        /* ===== 图标 ===== */
+        .nav-icon {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+            background-color: var(--c, #3385ff);
+            background-image: linear-gradient(168deg,
+                    rgba(255, 255, 255, 0.22) 0%,
+                    rgba(255, 255, 255, 0.03) 40%,
+                    rgba(0, 0, 0, 0.10) 100%);
+            filter: saturate(0.70) brightness(1.02);
+            box-shadow:
+                0 6px 16px -2px rgba(0, 0, 0, 0.28),
+                0 2px 5px rgba(0, 0, 0, 0.14),
+                inset 0 1px 0 rgba(255, 255, 255, 0.26),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.06);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.20);
+            transition: box-shadow .2s ease, filter .2s ease, transform .2s ease;
+        }
+
+        .nav-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+        }
+
+        .nav-icon i { font-size: 19px; line-height: 1; }
+
+        .nav-item:hover .nav-icon {
+            filter: saturate(0.86) brightness(1.05);
+            transform: translateY(-3px);
+            box-shadow:
+                0 0 0 2px rgba(255, 255, 255, 0.34),
+                0 18px 34px -4px rgba(0, 0, 0, 0.38),
+                0 4px 10px rgba(0, 0, 0, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.32);
+        }
+
+        /* ===== 状态点 ===== */
+        .nav-icon .dot {
+            position: absolute;
+            right: 1px;
+            top: 1px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #5fd39a;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.92);
+        }
+
+        .nav-icon .dot.off { background: #ef7f79; }
+        .nav-icon .dot.unknown { background: rgba(255, 255, 255, 0.45); }
+
+        .nav-name {
+            font-size: 13.5px;
+            line-height: 1.35;
+            color: var(--text-name);
+            font-weight: 500;
+            text-align: center;
+            word-break: break-word;
+            max-width: 100%;
+            transition: color .3s ease;
+        }
+
+        /* ===== 右下角浮动按钮 ===== */
+        .dock {
+            position: fixed;
+            right: 18px;
+            bottom: calc(env(safe-area-inset-bottom) + 16px);
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            z-index: 20;
+        }
+
+        .theme-toggle {
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            line-height: 1;
+            color: var(--chip-text);
+            background: var(--chip-bg);
+            border: 1px solid var(--chip-border);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(40, 70, 95, 0.16);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            transition: background .2s ease, color .2s ease, transform .2s ease;
+        }
+
+        .theme-toggle:hover { transform: rotate(-18deg); }
+
+        .admin-entry {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--chip-text);
+            background: var(--chip-bg);
+            border: 1px solid var(--chip-border);
+            border-radius: 999px;
+            box-shadow: 0 4px 14px rgba(40, 70, 95, 0.16);
+            text-decoration: none;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            transition: background .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease;
+        }
+
+        .admin-entry:hover {
+            background: #5f9ea0;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(40, 70, 95, 0.24);
+            transform: translateY(-1px);
+            text-decoration: none;
+        }
+
+        .card h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-soft);
+            letter-spacing: 4px;
+            margin-top: 30px !important;
+            text-shadow: none;
+            transition: color .3s ease;
+        }
+
+        /* ===== 页脚 ===== */
+        .footer,
+        .footer p,
+        .footer a {
+            color: var(--text-soft) !important;
+            font-weight: 500;
+            text-shadow: 0 1px 2px var(--text-halo);
+        }
+
+        /* ===== 磨砂降级 ===== */
+        @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+            .card { background: var(--card-bg) !important; }
+            .searchBox { background: var(--search-bg); }
+            .nav-panel { background: var(--panel-bg); }
+        }
+
+        /* ===== 平板及以下 ===== */
+        @media (max-width: 991px) {
+            .row.my-card {
+                flex-wrap: wrap;
+                border-radius: 18px !important;
+            }
+
+            .row.my-card > .col-lg-4.photo-bg {
+                flex: 0 0 100%;
+                width: 100%;
+                max-width: 100%;
+                height: 210px;
+                background-image: url(/Selena.jpg) !important;
+                background-position: center 26%;
+                background-size: cover;
+            }
+
+            .row.my-card > .col-lg-8.card {
+                flex: 1 1 100%;
+                width: 100%;
+                padding: 34px 30px 32px !important;
+            }
+
+            .searchBox { width: 92%; }
+        }
+
+        /* ===== 手机 ===== */
+        @media (max-width: 767px) {
+            body {
+                padding-top: env(safe-area-inset-top);
+                padding-left: env(safe-area-inset-left);
+                padding-right: env(safe-area-inset-right);
+            }
+
+            #main.container {
+                padding-left: 10px;
+                padding-right: 10px;
+                padding-bottom: calc(env(safe-area-inset-bottom) + 18px);
+            }
+
+            .row.my-card {
+                border-radius: 16px !important;
+                margin: 10px 0 !important;
+            }
+
+            .photo-bg {
+                height: 148px;
+                background-position: center 22%;
+            }
+
+            .card { padding: 20px 15px 22px !important; }
+
+            .searchBox { width: 100%; }
+
+            .poem { margin: 20px 0 18px; }
+            .poem .en { font-size: 14.5px; line-height: 1.7; }
+            .poem .cn {
+                font-size: 14px;
+                letter-spacing: 2.5px;
+                line-height: 1.95;
+                margin-bottom: 12px;
+            }
+
+            .nav-panel { padding: 14px 8px 8px; border-radius: 14px; }
+            .nav-grid { gap: 26px; max-width: 100%; }
+            .nav-row { gap: 6px; }
+            .nav-item {
+                flex: 1 1 0;
+                min-width: 0;
+                max-width: 76px;
+                gap: 7px;
+                padding: 10px 2px 8px;
+            }
+            .nav-icon { width: 42px; height: 42px; border-radius: 12px; font-size: 17px; }
+            .nav-icon i { font-size: 17px; }
+            .nav-name { font-size: 12.5px; }
+
+            .card h4 { margin-top: 20px !important; font-size: 12px; letter-spacing: 2px; }
+            .dock { right: 12px; bottom: calc(env(safe-area-inset-bottom) + 10px); }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main" class="container">
+        <div class="row my-card justify-content-center">
+            <div class="col-lg-4 photo-bg"></div>
+            <div class="col-lg-8 card">
+
+                <div class="searchBox">
+                    <form action="http://www.baidu.com/baidu" target="_blank">
+                        <input name="tn" type="hidden" value="baidu">
+                        <input class="inputBox" type="text" name="word" size="30" placeholder="请输入搜索内容">
+                        <input class="searchBtn" type="submit" value="百度搜索">
+                    </form>
+                </div>
+
+                <div class="poem">
+                    <div class="pair">
+                        <span class="en">Shall I compare thee to a summer's day?</span>
+                        <span class="cn">我可否将你比作一个夏日</span>
+                    </div>
+                    <div class="pair">
+                        <span class="en">Thou art more lovely and more temperate.</span>
+                        <span class="cn">你比夏天还要美丽温婉</span>
+                    </div>
+                </div>
+
+                <div class="nav-panel">
+                    <div id="links" class="nav-grid">
+                        <span style="color:#95a5a6;font-size:13px">加载中…</span>
+                    </div>
+                </div>
+
+                <h4 class="mt-4">他山之石，可以攻玉</h4>
+
+            </div>
+        </div>
+        <div class="footer">
+            <footer class="mt-3">
+                <p>Copyright 2023 <a href="" target="_blank">ArcoIris</a>
+                </p>
+            </footer>
+        </div>
+    </div>
+
+    <div class="dock">
+        <button class="theme-toggle" id="themeBtn" title="切换主题">◐</button>
+        <a class="admin-entry" href="/admin">管理</a>
+    </div>
+
+    <script>
+        /* ===== 主题 ===== */
+        var root = document.documentElement;
+
+        function applyTheme(t) {
+            root.setAttribute('data-theme', t);
+            localStorage.setItem('arco-iris-theme', t);
+            var b = document.getElementById('themeBtn');
+            if (b) b.textContent = t === 'dark' ? '☀' : '◐';
+        }
+
+        document.getElementById('themeBtn').onclick = function () {
+            applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        };
+
+        applyTheme(root.getAttribute('data-theme') || 'light');
+
+        /* ===== 服务渲染 ===== */
+        function esc(s) {
+            return String(s).replace(/[&<>"']/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+
+        function initialOf(name) {
+            var t = (name || '').trim();
+            if (!t) return '?';
+            var c = t.charAt(0);
+            return /[a-z]/.test(c) ? c.toUpperCase() : c;
+        }
+
+        function originOf(u) {
+            try {
+                var p = new URL(u, location.origin);
+                return p.origin;
+            } catch (e) { return ''; }
+        }
+
+        /* favicon 加载失败 → 退回首字母 */
+        window.iconFail = function (img) {
+            var ini = img.getAttribute('data-ini') || '?';
+            var sp = document.createElement('span');
+            sp.textContent = ini;
+            img.parentNode.replaceChild(sp, img);
+        };
+
+        function iconHtml(s) {
+            var ic = (s.icon || '').trim();
+            var ini = initialOf(s.name);
+
+            /* Font Awesome 类名 */
+            if (ic.indexOf('fa-') === 0 || /^fa[srb] /.test(ic)) {
+                var cls = ic.indexOf('fa-') === 0 ? 'fas ' + ic : ic;
+                return '<i class="' + esc(cls) + '"></i>';
+            }
+
+            var src = '';
+            if (/^(https?:\/\/|\/)/.test(ic)) {
+                src = ic;                       /* 自定义图片 / 上传的文件 */
+            } else {
+                var o = originOf(s.url);        /* 未设置 → 自动取网站 favicon */
+                if (o) src = o + '/favicon.ico';
+            }
+
+            if (src) {
+                return '<img src="' + esc(src) + '" data-ini="' + esc(ini) +
+                    '" alt="" onerror="iconFail(this)">';
+            }
+            return esc(ini);
+        }
+
+        function itemHtml(s, status) {
+            var st = status && (s.id in status) ? (status[s.id] ? '' : ' off') : ' unknown';
+            return '<a href="' + esc(s.url) + '" class="nav-item" target="_blank" title="' + esc(s.name) + '">' +
+                '<span class="nav-icon" style="--c:' + esc(s.color) + '">' +
+                iconHtml(s) +
+                '<i class="dot' + st + '"></i>' +
+                '</span>' +
+                '<span class="nav-name">' + esc(s.name) + '</span>' +
+                '</a>';
+        }
+
+        function perRowCount() {
+            var el = document.getElementById('links');
+            var w = el ? el.clientWidth : 0;
+            if (!w) {
+                var card = document.querySelector('.card');
+                w = card ? card.clientWidth - 90 : 480;
+            }
+            var unit = window.innerWidth <= 767 ? 82 : 100;
+            return Math.floor(w / unit);
+        }
+
+        /* n 个元素尽量均分到若干行 */
+        function rowsOf(n, max) {
+            if (n <= max) return [n];
+            var rows = Math.ceil(n / max);
+            var base = Math.floor(n / rows);
+            var rem = n % rows;
+            var out = [];
+            for (var i = 0; i < rows; i++) out.push(base + (i < rem ? 1 : 0));
+            return out;
+        }
+
+        function render(list, status) {
+            var box = document.getElementById('links');
+            if (!list.length) {
+                box.innerHTML = '<span style="color:#95a5a6;font-size:13px">还没有服务，点右下角「管理」添加</span>';
+                return;
+            }
+            var max = Math.max(2, Math.min(6, perRowCount()));
+            var counts = rowsOf(list.length, max);
+            var idx = 0;
+            box.innerHTML = counts.map(function (c) {
+                var row = list.slice(idx, idx + c);
+                idx += c;
+                return '<div class="nav-row">' +
+                    row.map(function (s) { return itemHtml(s, status); }).join('') +
+                    '</div>';
+            }).join('');
+        }
+
+        var _list = [], _status = null;
+
+        window.addEventListener('resize', function () {
+            clearTimeout(window._rt);
+            window._rt = setTimeout(function () {
+                if (_list.length) render(_list, _status);
+            }, 180);
+        });
+
+        fetch('/api/services').then(function (r) { return r.json(); }).then(function (list) {
+            _list = list;
+            render(_list, null);
+            fetch('/api/status').then(function (r) { return r.json(); }).then(function (st) {
+                _status = st;
+                render(_list, _status);
+            }).catch(function () { });
+        }).catch(function () {
+            document.getElementById('links').innerHTML =
+                '<span style="color:#e74c3c;font-size:13px">加载服务列表失败</span>';
+        });
+    </script>
+</body>
+
+</html>
