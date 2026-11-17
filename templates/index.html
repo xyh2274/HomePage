@@ -553,14 +553,14 @@
 
             .card h4 { margin-top: 20px !important; font-size: 12px; letter-spacing: 2px; }
 
-            /* 手机上固定到左侧垂直居中：拇指好够，且避开图标列 */
+            /* 手机上：右下角浮窗（离边缘留一点，不贴死） */
             .dock {
                 position: fixed;
-                left: 4px;
-                top: 50%;
-                right: auto;
-                bottom: auto;
-                transform: translateY(-50%);
+                right: 14px;
+                bottom: calc(env(safe-area-inset-bottom) + 76px);
+                left: auto;
+                top: auto;
+                transform: none;
                 flex-direction: column;
                 gap: 10px;
                 margin: 0;
@@ -569,27 +569,27 @@
             }
 
             .theme-toggle {
-                width: 32px;
-                height: 32px;
-                font-size: 13px;
-                box-shadow: 0 3px 10px rgba(40, 70, 95, 0.18);
+                width: 34px;
+                height: 34px;
+                font-size: 15px;
+                box-shadow: 0 4px 12px rgba(40, 70, 95, 0.20);
             }
 
             .admin-entry {
-                width: 32px;
-                height: 32px;
+                width: 34px;
+                height: 34px;
                 padding: 0;
                 font-size: 0;              /* 隐藏「管理」文字 */
                 border-radius: 50%;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                box-shadow: 0 3px 10px rgba(40, 70, 95, 0.18);
+                box-shadow: 0 4px 12px rgba(40, 70, 95, 0.20);
             }
 
             .admin-entry::after {
                 content: '⚙';
-                font-size: 14px;
+                font-size: 15px;
             }
         }
     </style>
@@ -637,7 +637,7 @@
     </div>
 
     <div class="dock">
-        <button class="theme-toggle" id="themeBtn" title="切换主题">◐</button>
+        <button class="theme-toggle" id="themeBtn" title="切换主题">☀</button>
         <a class="admin-entry" href="/admin">管理</a>
     </div>
 
@@ -649,7 +649,7 @@
             root.setAttribute('data-theme', t);
             localStorage.setItem('arco-iris-theme', t);
             var b = document.getElementById('themeBtn');
-            if (b) b.textContent = t === 'dark' ? '☀' : '◐';
+            if (b) b.textContent = t === 'dark' ? '☾' : '☀';
         }
 
         document.getElementById('themeBtn').onclick = function () {

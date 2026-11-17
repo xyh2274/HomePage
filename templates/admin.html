@@ -491,7 +491,7 @@
                     <a href="/" target="_blank">查看导航页 →</a>
                     <a href="/logout" style="margin-left:14px">退出</a>
                 </div>
-                <button class="theme-btn" id="themeBtn" title="切换主题">◐</button>
+                <button class="theme-btn" id="themeBtn" title="切换主题">☀</button>
             </div>
         </header>
 
@@ -500,7 +500,7 @@
             <div class="add-row">
                 <input type="color" id="newColor" value="#3385ff">
                 <input type="text" id="newName" placeholder="名称，如 Komga">
-                <input type="url" id="newUrl" placeholder="地址，如 http://192.168.1.100:25600/">
+                <input type="url" id="newUrl" placeholder="地址，如 http://192.168.5.105:25600/">
                 <input type="text" id="newIcon" placeholder="图标（可选）">
                 <button id="btnAdd">添加</button>
             </div>
@@ -536,7 +536,7 @@
             root.setAttribute('data-theme', t);
             localStorage.setItem('arco-iris-theme', t);
             var b = document.getElementById('themeBtn');
-            if (b) b.textContent = t === 'dark' ? '☀' : '◐';
+            if (b) b.textContent = t === 'dark' ? '☾' : '☀';
         }
 
         document.getElementById('themeBtn').onclick = function () {

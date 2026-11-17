@@ -196,7 +196,7 @@
 
 <body>
     <form class="box" method="post">
-        <button class="theme-btn" type="button" id="themeBtn" title="切换主题">◐</button>
+        <button class="theme-btn" type="button" id="themeBtn" title="切换主题">☀</button>
 
         <div class="brand">
             <h1>ArcoIris</h1>
@@ -215,7 +215,7 @@
         function applyTheme(t) {
             root.setAttribute('data-theme', t);
             localStorage.setItem('arco-iris-theme', t);
-            document.getElementById('themeBtn').textContent = t === 'dark' ? '☀' : '◐';
+            document.getElementById('themeBtn').textContent = t === 'dark' ? '☾' : '☀';
         }
 
         document.getElementById('themeBtn').onclick = function () {
