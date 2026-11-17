@@ -36,14 +36,14 @@ cd HomePage
 docker compose up -d --build
 ```
 
-访问 `http://<NAS-IP>:8081`，管理后台在 `/admin`。
+访问 `http://<NAS-IP>:8889`，管理后台在 `/admin`（宿主 8889 → 容器 8081）。
 
 首次启动会自动建库并写入几条示例服务，可以直接在后台改成自己的。
 
 ### 环境要求
 
 - Docker + Docker Compose
-- 端口 `8081` 未被占用
+- 端口 `8889` 未被占用
 
 ---
 
@@ -56,7 +56,7 @@ docker compose up -d --build
 | `ADMIN_PASSWORD` | `arcoiris` | 管理后台密码。**建议改掉**，改完 `docker compose up -d` |
 | `SECRET_KEY` | 固定值 | Flask session 签名。换了会导致登录失效，换机器部署建议重新生成 |
 | `DATA_DIR` | `/data` | 数据库与上传文件位置 |
-| `PORT` | `8081` | 监听端口 |
+| `PORT` | `8081` | 容器内监听端口（宿主机映射见 ports） |
 | `TZ` | `Asia/Shanghai` | 时区（影响日志时间） |
 
 ---

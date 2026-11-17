@@ -4,7 +4,7 @@ services:
     container_name: nav
     restart: unless-stopped
     ports:
-      - '8081:8081'
+      - '8889:8081'                    # 宿主机 8889 → 容器内 gunicorn 的 8081
     volumes:
       - ./data:/data                   # SQLite 数据库 + 上传的图标
       - ./templates:/app/templates:ro  # 改模板不用重建镜像
@@ -13,5 +13,5 @@ services:
       - ADMIN_PASSWORD=arcoiris        # 改这里后 docker compose up -d
       - DATA_DIR=/data
       - SECRET_KEY=f3a9c1e7b25d48f0a6c3e9b17d5408fa
-      - PORT=8081
+      - PORT=8081                      # 容器内监听端口（与 Dockerfile 的 gunicorn 一致）
       - TZ=Asia/Shanghai
