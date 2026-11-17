@@ -2,7 +2,7 @@
 
 一个轻量级的 NAS 导航页，带可视化管理后台。
 
-![导航页](https://cdn.jsdelivr.net/gh/xyh2274/tuchuang@main/HomePage/screenshot-light.webp)
+![导航页](https://cdn.jsdelivr.net/gh/xyh2274/tuchuang@9241860/HomePage/screenshot-light.webp)
 
 服务列表存在 SQLite 里，通过 `/admin` 网页增删改，加一个服务不需要碰代码。前端是玻璃拟态风格，支持明暗双主题、图标自动抓取、服务在线状态。
 
@@ -24,7 +24,7 @@
 
 | 桌面 | 移动端 |
 |---|---|
-| ![桌面](https://cdn.jsdelivr.net/gh/xyh2274/tuchuang@main/HomePage/screenshot-light.webp) | ![移动端](https://cdn.jsdelivr.net/gh/xyh2274/tuchuang@main/HomePage/screenshot-mobile.webp) |
+| ![桌面](https://cdn.jsdelivr.net/gh/xyh2274/tuchuang@9241860/HomePage/screenshot-light.webp) | ![移动端](https://cdn.jsdelivr.net/gh/xyh2274/tuchuang@9241860/HomePage/screenshot-mobile.webp) |
 
 ---
 
