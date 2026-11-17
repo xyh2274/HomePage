@@ -255,6 +255,7 @@
 
         /* ===== 导航面板 ===== */
         .nav-panel {
+            position: relative;
             margin-top: 10px;
             padding: 16px 12px 8px;
             background: var(--panel-bg);
@@ -264,6 +265,61 @@
             backdrop-filter: blur(3px);
             -webkit-backdrop-filter: blur(3px);
             transition: background .3s ease, border-color .3s ease;
+        }
+
+        /* 超出可视行数时：内容区内部滚动 */
+        .nav-panel.is-scrollable #links {
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;          /* 隐藏原生滚动条，用自定义提示条 */
+        }
+
+        .nav-panel.is-scrollable #links::-webkit-scrollbar { display: none; }
+
+        /* 右侧渐隐竖条：提示"这里还能滚" */
+        .nav-panel.is-scrollable::before {
+            content: '';
+            position: absolute;
+            right: 4px;
+            top: 14px;
+            bottom: 14px;
+            width: 3px;
+            border-radius: 2px;
+            background: linear-gradient(to bottom,
+                    rgba(95, 158, 160, 0) 0%,
+                    rgba(95, 158, 160, 0.65) 18%,
+                    rgba(95, 158, 160, 0.65) 82%,
+                    rgba(95, 158, 160, 0) 100%);
+            pointer-events: none;
+            transition: opacity .25s ease;
+        }
+
+        /* 底部箭头：轻微上下浮动 */
+        .nav-panel.is-scrollable::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 3px;
+            width: 10px;
+            height: 10px;
+            border-right: 2.5px solid rgba(95, 158, 160, 0.92);
+            border-bottom: 2.5px solid rgba(95, 158, 160, 0.92);
+            transform: translateX(-50%) rotate(45deg);
+            animation: navBob 1.8s ease-in-out infinite;
+            pointer-events: none;
+            transition: opacity .25s ease;
+        }
+
+        @keyframes navBob {
+            0%, 100% { transform: translateX(-50%) rotate(45deg) translateY(0); opacity: .45; }
+            50%      { transform: translateX(-50%) rotate(45deg) translateY(4px); opacity: 1; }
+        }
+
+        /* 滚到底：提示全部淡出 */
+        .nav-panel.at-bottom::before,
+        .nav-panel.at-bottom::after {
+            opacity: 0;
         }
 
         /* ===== 导航：按行分组 ===== */
@@ -560,26 +616,7 @@
                 margin-bottom: 12px;
             }
 
-            .nav-panel {
-                padding: 14px 8px 8px;
-                border-radius: 14px;
-                /* 服务多时区域内部滚动，不把页面撑太长 */
-                max-height: 56vh;
-                overflow-y: auto;
-                overscroll-behavior: contain;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: thin;
-                scrollbar-color: rgba(95, 158, 160, 0.45) transparent;
-            }
-
-            .nav-panel::-webkit-scrollbar { width: 4px; }
-
-            .nav-panel::-webkit-scrollbar-thumb {
-                background: rgba(95, 158, 160, 0.45);
-                border-radius: 2px;
-            }
-
-            .nav-panel::-webkit-scrollbar-track { background: transparent; }
+            .nav-panel { padding: 14px 8px 8px; border-radius: 14px; }
             .nav-grid { gap: 26px; max-width: 100%; }
             .nav-row { gap: 6px; }
             .nav-item {
@@ -826,6 +863,43 @@
                     row.map(function (s) { return itemHtml(s, status); }).join('') +
                     '</div>';
             }).join('');
+
+            applyScrollLimit(counts.length);
+        }
+
+        /* 桌面最多 4 行（五列≈20 个），手机最多 2 行（三列=6 个），超出内部滚动 */
+        function applyScrollLimit(rowCount) {
+            var box = document.getElementById('links');
+            var panel = box ? box.parentNode : null;
+            if (!box || !panel) return;
+
+            var mobile = window.innerWidth <= 767;
+            var maxRows = mobile ? 2 : 4;
+
+            panel.classList.remove('is-scrollable', 'at-bottom');
+            box.style.maxHeight = '';
+            box.onscroll = null;
+
+            if (rowCount <= maxRows) return;
+
+            /* 用第 maxRows 行的实际底部位置，比按 item 高度估算准 */
+            var rows = box.querySelectorAll('.nav-row');
+            var h;
+            if (rows.length >= maxRows) {
+                var boxTop = box.getBoundingClientRect().top;
+                var lastBottom = rows[maxRows - 1].getBoundingClientRect().bottom;
+                h = Math.ceil(lastBottom - boxTop) + 12;
+            } else {
+                h = box.scrollHeight;
+            }
+
+            box.style.maxHeight = h + 'px';
+            panel.classList.add('is-scrollable');
+
+            box.onscroll = function () {
+                var atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 2;
+                panel.classList.toggle('at-bottom', atBottom);
+            };
         }
 
         var _list = [], _status = null;
