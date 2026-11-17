@@ -78,7 +78,6 @@ HomePage/
 │   ├── side.jpg            预裁竖版（桌面左栏用）
 │   ├── favicon.ico
 │   └── style.css           原页面样式
-├── docs/                   README 截图
 ├── legacy/                 原静态页备份，仅供对照
 │   ├── index.html
 │   └── main.js
