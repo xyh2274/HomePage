@@ -20,7 +20,7 @@ DB_PATH = os.path.join(DATA_DIR, 'services.db')
 UPLOAD_DIR = os.path.join(DATA_DIR, 'uploads')
 ALLOWED_ICON_EXT = {'.png', '.jpg', '.jpeg', '.svg', '.ico', '.webp', '.gif'}
 MAX_ICON_BYTES = 2 * 1024 * 1024
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'arcoiris')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '123456')
 PORT = int(os.environ.get('PORT', 8081))
 
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -33,13 +33,13 @@ app.secret_key = os.environ.get('SECRET_KEY') or os.urandom(32).hex()
 # ---------------- 数据库 ----------------
 
 SEED = [
-    ('飞牛 NAS',   'http://192.168.1.100:5666/',      '#3385ff', 'server'),
-    ('kikoeru',    'http://192.168.1.100:8888/',      '#af00ff', 'headphones'),
-    ('Komga',      'http://192.168.1.100:25600/',     '#2ed000', 'book'),
+    ('飞牛 NAS',   'http://192.168.5.105:5666/',      '#3385ff', 'server'),
+    ('kikoeru',    'http://192.168.5.105:8888/',      '#af00ff', 'headphones'),
+    ('Komga',      'http://192.168.5.105:25600/',     '#2ed000', 'book'),
     ('哔哩哔哩',    'https://www.bilibili.com/',        '#09c5de', 'tv'),
-    ('Emby',       'http://192.168.1.100:8096/',      '#da5b5b', 'film'),
-    ('Calibre',    'http://192.168.1.100:8083/',      '#d4a40a', 'book-open'),
-    ('Homarr',     'http://192.168.1.100:7575/',      '#444444', 'grid'),
+    ('Emby',       'http://192.168.5.105:8096/',      '#da5b5b', 'film'),
+    ('Calibre',    'http://192.168.5.105:8083/',      '#d4a40a', 'book-open'),
+    ('Homarr',     'http://192.168.5.105:7575/',      '#444444', 'grid'),
 ]
 
 

@@ -53,7 +53,7 @@ docker compose up -d --build
 
 | 变量 | 默认 | 说明 |
 |---|---|---|
-| `ADMIN_PASSWORD` | `arcoiris` | 管理后台密码。**建议改掉**，改完 `docker compose up -d` |
+| `ADMIN_PASSWORD` | `123456` | 管理后台密码。**建议改掉**，改完 `docker compose up -d` |
 | `SECRET_KEY` | 固定值 | Flask session 签名。换了会导致登录失效，换机器部署建议重新生成 |
 | `DATA_DIR` | `/data` | 数据库与上传文件位置 |
 | `PORT` | `8081` | 容器内监听端口（宿主机映射见 ports） |

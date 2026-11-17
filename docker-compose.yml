@@ -10,7 +10,7 @@ services:
       - ./templates:/app/templates:ro  # 改模板不用重建镜像
       - ./static:/app/static:ro        # 背景图 / 照片 / 原样式
     environment:
-      - ADMIN_PASSWORD=arcoiris        # 改这里后 docker compose up -d
+      - ADMIN_PASSWORD=123456        # 改这里后 docker compose up -d
       - DATA_DIR=/data
       - SECRET_KEY=f3a9c1e7b25d48f0a6c3e9b17d5408fa
       - PORT=8081                      # 容器内监听端口（与 Dockerfile 的 gunicorn 一致）

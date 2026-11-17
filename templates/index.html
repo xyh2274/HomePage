@@ -123,6 +123,7 @@
 
         /* 照片：固定宽度，清零 col 内边距 */
         .row.my-card > .col-lg-4.photo-bg {
+            position: relative;
             flex: 0 0 272px;
             width: 272px;
             max-width: 272px;
@@ -132,6 +133,20 @@
             background-position: center center;
             background-size: cover;
             background-repeat: no-repeat;
+        }
+
+        /* 照片底部渐隐进卡片，消除硬切线 */
+        .row.my-card > .col-lg-4.photo-bg::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 72px;
+            background: linear-gradient(to bottom,
+                    rgba(8, 12, 16, 0) 0%,
+                    var(--card-bg) 100%);
+            pointer-events: none;
         }
 
         .row.my-card > .col-lg-8.card {
@@ -428,13 +443,26 @@
             transition: color .3s ease;
         }
 
-        /* ===== 页脚 ===== */
+        /* ===== 页脚（在卡片内，成为卡片下沿） ===== */
+        .footer {
+            margin-top: 26px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(95, 158, 160, 0.14);
+            text-align: center;
+        }
+
         .footer,
         .footer p,
         .footer a {
             color: var(--text-soft) !important;
             font-weight: 500;
             text-shadow: 0 1px 2px var(--text-halo);
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 12px;
+            letter-spacing: .5px;
         }
 
         /* ===== 磨砂降级 ===== */
@@ -569,13 +597,11 @@
 
                 <h4 class="mt-4">他山之石，可以攻玉</h4>
 
+                <div class="footer">
+                    <p>Copyright 2023 <a href="" target="_blank">ArcoIris</a></p>
+                </div>
+
             </div>
-        </div>
-        <div class="footer">
-            <footer class="mt-3">
-                <p>Copyright 2023 <a href="" target="_blank">ArcoIris</a>
-                </p>
-            </footer>
         </div>
     </div>
 
