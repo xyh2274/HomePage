@@ -626,14 +626,14 @@
                     </form>
                 </div>
 
-                <div class="poem">
+                <div class="poem" id="poem">
                     <div class="pair">
-                        <span class="en">Shall I compare thee to a summer's day?</span>
-                        <span class="cn">我可否将你比作一个夏日</span>
+                        <span class="en" id="poemEn1">Shall I compare thee to a summer's day?</span>
+                        <span class="cn" id="poemCn1">我可否将你比作一个夏日</span>
                     </div>
-                    <div class="pair">
-                        <span class="en">Thou art more lovely and more temperate.</span>
-                        <span class="cn">你比夏天还要美丽温婉</span>
+                    <div class="pair" id="pair2">
+                        <span class="en" id="poemEn2">Thou art more lovely and more temperate.</span>
+                        <span class="cn" id="poemCn2">你比夏天还要美丽温婉</span>
                     </div>
                 </div>
 
@@ -643,7 +643,7 @@
                     </div>
                 </div>
 
-                <h4 class="mt-4">他山之石，可以攻玉</h4>
+                <h4 class="mt-4" id="signature">他山之石，可以攻玉</h4>
 
                 <div class="footer">
                     <p>Copyright 2023 <a href="" target="_blank">ArcoIris</a></p>
@@ -686,6 +686,23 @@
         };
 
         applyTheme(root.getAttribute('data-theme') || 'light');
+
+        /* ===== 页面文案（诗歌 / 签名），后台可改 ===== */
+        fetch('/api/settings').then(function (r) { return r.json(); }).then(function (s) {
+            function set(id, v) {
+                var el = document.getElementById(id);
+                if (el && v !== undefined && v !== null && v !== '') el.textContent = v;
+            }
+            set('poemEn1', s.poem_en_1);
+            set('poemCn1', s.poem_cn_1);
+            set('poemEn2', s.poem_en_2);
+            set('poemCn2', s.poem_cn_2);
+            set('signature', s.signature);
+
+            /* 第二组诗留空 → 整组隐藏 */
+            var p2 = document.getElementById('pair2');
+            if (p2 && !s.poem_en_2 && !s.poem_cn_2) p2.style.display = 'none';
+        }).catch(function () { });
 
         /* ===== 服务渲染 ===== */
         function esc(s) {

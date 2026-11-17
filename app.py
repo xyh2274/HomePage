@@ -43,6 +43,16 @@ SEED = [
 ]
 
 
+# 页面文案默认值（可在管理后台修改）
+DEFAULT_SETTINGS = {
+    'poem_en_1': "Shall I compare thee to a summer's day?",
+    'poem_cn_1': "我可否将你比作一个夏日",
+    'poem_en_2': "Thou art more lovely and more temperate.",
+    'poem_cn_2': "你比夏天还要美丽温婉",
+    'signature': "他山之石，可以攻玉",
+}
+
+
 def db():
     con = sqlite3.connect(DB_PATH)
     con.row_factory = sqlite3.Row
@@ -63,6 +73,14 @@ def init_db():
                 enabled INTEGER DEFAULT 1
             )
         """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS settings (
+                key   TEXT PRIMARY KEY,
+                value TEXT NOT NULL DEFAULT ''
+            )
+        """)
+        for k, v in DEFAULT_SETTINGS.items():
+            con.execute("INSERT OR IGNORE INTO settings(key,value) VALUES(?,?)", (k, v))
         con.commit()
         if con.execute("SELECT COUNT(*) FROM services").fetchone()[0] == 0:
             for i, (n, u, c, ic) in enumerate(SEED):
@@ -75,6 +93,17 @@ def init_db():
         con.rollback()
     finally:
         con.close()
+
+
+def get_settings():
+    con = db()
+    try:
+        rows = con.execute("SELECT key, value FROM settings").fetchall()
+    finally:
+        con.close()
+    d = dict(DEFAULT_SETTINGS)
+    d.update({r['key']: r['value'] for r in rows})
+    return d
 
 
 # ---------------- 认证 ----------------
@@ -121,6 +150,11 @@ def api_list():
         "SELECT * FROM services WHERE enabled=1 ORDER BY sort, id").fetchall()
     con.close()
     return jsonify([dict(r) for r in rows])
+
+
+@app.route('/api/settings')
+def api_settings():
+    return jsonify(get_settings())
 
 
 # ---------------- 管理后台 ----------------
@@ -198,6 +232,22 @@ def api_reorder():
     con = db()
     for i, sid in enumerate(ids):
         con.execute("UPDATE services SET sort=? WHERE id=?", (i * 10, sid))
+    con.commit()
+    con.close()
+    return jsonify({'ok': True})
+
+
+@app.route('/api/admin/settings', methods=['PUT'])
+@login_required
+def api_admin_settings():
+    data = request.get_json(force=True) or {}
+    con = db()
+    for k in DEFAULT_SETTINGS:
+        if k in data:
+            con.execute(
+                "INSERT INTO settings(key,value) VALUES(?,?) "
+                "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                (k, str(data[k])[:500]))
     con.commit()
     con.close()
     return jsonify({'ok': True})

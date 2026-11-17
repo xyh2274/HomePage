@@ -196,6 +196,38 @@
             align-items: center;
         }
 
+        /* ===== 文案设置 ===== */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 96px 1fr;
+            gap: 9px 12px;
+            align-items: center;
+        }
+
+        .settings-grid label {
+            font-size: 12.5px;
+            color: var(--text-soft);
+            letter-spacing: .5px;
+        }
+
+        .settings-grid input {
+            width: 100%;
+            padding: 9px 11px;
+            font-size: 13px;
+            color: var(--text);
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 9px;
+            outline: none;
+            transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+        }
+
+        .settings-grid input:focus {
+            background: var(--input-focus-bg);
+            border-color: rgba(95, 158, 160, 0.62);
+            box-shadow: 0 0 0 3px rgba(95, 158, 160, 0.14);
+        }
+
         input[type=text], input[type=url] {
             width: 100%;
             padding: 9px 11px;
@@ -535,6 +567,23 @@
         </div>
 
         <div class="card">
+            <h2>页面文案</h2>
+            <div class="settings-grid">
+                <label>诗一 · 英文</label>
+                <input type="text" id="set_poem_en_1" placeholder="Shall I compare thee...">
+                <label>诗一 · 中文</label>
+                <input type="text" id="set_poem_cn_1" placeholder="我可否将你比作一个夏日">
+                <label>诗二 · 英文</label>
+                <input type="text" id="set_poem_en_2" placeholder="留空则只显示一组">
+                <label>诗二 · 中文</label>
+                <input type="text" id="set_poem_cn_2" placeholder="留空则只显示一组">
+                <label>签名</label>
+                <input type="text" id="set_signature" placeholder="他山之石，可以攻玉">
+            </div>
+            <button id="btnSaveSettings" style="margin-top:14px">保存文案</button>
+        </div>
+
+        <div class="card">
             <h2>已有服务</h2>
             <table>
                 <thead>
@@ -808,7 +857,36 @@
             });
         };
 
+        /* ===== 页面文案 ===== */
+        function loadSettings() {
+            fetch('/api/settings').then(function (r) { return r.json(); }).then(function (s) {
+                document.getElementById('set_poem_en_1').value = s.poem_en_1 || '';
+                document.getElementById('set_poem_cn_1').value = s.poem_cn_1 || '';
+                document.getElementById('set_poem_en_2').value = s.poem_en_2 || '';
+                document.getElementById('set_poem_cn_2').value = s.poem_cn_2 || '';
+                document.getElementById('set_signature').value = s.signature || '';
+            }).catch(function () { });
+        }
+
+        document.getElementById('btnSaveSettings').onclick = function () {
+            var payload = {
+                poem_en_1: document.getElementById('set_poem_en_1').value.trim(),
+                poem_cn_1: document.getElementById('set_poem_cn_1').value.trim(),
+                poem_en_2: document.getElementById('set_poem_en_2').value.trim(),
+                poem_cn_2: document.getElementById('set_poem_cn_2').value.trim(),
+                signature: document.getElementById('set_signature').value.trim()
+            };
+            fetch('/api/admin/settings', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(function (r) {
+                if (r.ok) toast('文案已保存'); else toast('保存失败', false);
+            }).catch(function () { toast('保存失败', false); });
+        };
+
         load();
+        loadSettings();
     </script>
 </body>
 
