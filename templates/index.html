@@ -666,6 +666,7 @@
             .admin-entry .txt { display: none; }
         }
     </style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 
 <body>
@@ -816,7 +817,7 @@
 
         function itemHtml(s, status) {
             var st = status && (s.id in status) ? (status[s.id] ? '' : ' off') : ' unknown';
-            return '<a href="' + esc(s.url) + '" class="nav-item" target="_blank" title="' + esc(s.name) + '">' +
+            return '<a href="' + esc(s.url) + '" class="nav-item" data-id="' + s.id + '" target="_blank" title="' + esc(s.name) + '">' +
                 '<span class="nav-icon" style="--c:' + esc(s.color) + '">' +
                 iconHtml(s) +
                 '<i class="dot' + st + '"></i>' +
@@ -853,6 +854,8 @@
                 box.innerHTML = '<span style="color:#95a5a6;font-size:13px">还没有服务，点右下角「管理」添加</span>';
                 return;
             }
+            /* 个人排序：localStorage 优先，无则按后台 sort */
+            applyLocalOrder(list);
             var max = Math.max(2, Math.min(6, perRowCount()));
             var counts = rowsOf(list.length, max);
             var idx = 0;
@@ -865,6 +868,43 @@
             }).join('');
 
             applyScrollLimit(counts.length);
+            initDrag();
+        }
+
+        /* ===== 前台拖拽排序（个人化：存浏览器本地，不影响他人）===== */
+        function applyLocalOrder(list) {
+            var order = null;
+            try { order = JSON.parse(localStorage.getItem('arco-nav-order') || 'null'); } catch (e) { }
+            if (!Array.isArray(order)) return;
+            var pos = {};
+            order.forEach(function (id, i) { pos[id] = i; });
+            list.sort(function (a, b) {
+                var pa = (pos[a.id] !== undefined) ? pos[a.id] : 9999;
+                var pb = (pos[b.id] !== undefined) ? pos[b.id] : 9999;
+                return pa - pb;
+            });
+        }
+
+        function initDrag() {
+            if (!window.Sortable) return;
+            Array.prototype.forEach.call(document.querySelectorAll('.nav-row'), function (row) {
+                if (row._sortable) return;
+                row._sortable = Sortable.create(row, {
+                    group: 'nav-sort',
+                    animation: 150,
+                    delay: 150,
+                    delayOnTouchOnly: true,
+                    draggable: '.nav-item',
+                    ghostClass: 'drag-ghost',
+                    onEnd: function () {
+                        var order = Array.prototype.map.call(
+                            document.querySelectorAll('.nav-item[data-id]'),
+                            function (el) { return parseInt(el.getAttribute('data-id'), 10); });
+                        try { localStorage.setItem('arco-nav-order', JSON.stringify(order)); } catch (e) { }
+                        render(_list, _status);
+                    }
+                });
+            });
         }
 
         /* 桌面最多 4 行（五列≈20 个），手机最多 2 行（三列=6 个），超出内部滚动 */
