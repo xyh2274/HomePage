@@ -526,7 +526,28 @@
 
             .ibtn { width: 36px; height: 36px; font-size: 15px; }
         }
+
+        /* ===== 拖拽排序 ===== */
+        .drag-handle {
+            cursor: grab;
+            font-size: 15px;
+            color: var(--text-soft);
+            padding: 0 2px;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: color .15s ease;
+        }
+
+        .drag-handle:hover { color: var(--accent); }
+
+        .sortable-ghost {
+            opacity: 0.35;
+            background: rgba(95, 158, 160, 0.14) !important;
+        }
+
+        .sortable-chosen .drag-handle { cursor: grabbing; color: var(--accent); }
     </style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 
 <body>
@@ -713,16 +734,41 @@
                     '<button class="ibtn btn-upload" title="上传图标">↑</button>' +
                     '</div></td>' +
                     '<td class="op-cell" data-label="操作"><div class="ops">' +
+                    '<span class="drag-handle" title="拖动排序">⠿</span>' +
                     '<button class="ibtn save btn-save" title="保存">✓</button>' +
                     '<button class="ibtn btn-toggle" title="' + (s.enabled ? '隐藏' : '显示') + '">' + (s.enabled ? '◉' : '○') + '</button>' +
-                    '<button class="ibtn btn-up" title="上移">↑</button>' +
-                    '<button class="ibtn btn-down" title="下移">↓</button>' +
                     '<button class="ibtn del btn-del" title="删除">✕</button>' +
                     '</div></td>' +
                     '</tr>';
             }).join('');
 
             Array.prototype.forEach.call(tb.querySelectorAll('tr'), bindRow);
+
+            /* 拖拽排序（单例初始化，render 重建行不影响实例） */
+            if (window.Sortable && !window._rowsSortable) {
+                window._rowsSortable = Sortable.create(tb, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    onEnd: function () {
+                        var ids = Array.prototype.map.call(
+                            tb.querySelectorAll('tr[data-id]'),
+                            function (tr) { return parseInt(tr.getAttribute('data-id'), 10); });
+                        /* data 数组按新 DOM 顺序重排 */
+                        data.sort(function (a, b) {
+                            return ids.indexOf(a.id) - ids.indexOf(b.id);
+                        });
+                        fetch('/api/admin/reorder', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ids: ids })
+                        }).then(function (r) {
+                            if (r.ok) toast('排序已保存');
+                        }).catch(function () { });
+                    }
+                });
+            }
         }
 
         function bindRow(tr) {
@@ -783,9 +829,6 @@
                     .then(function () { toast('已删除'); load(); });
             };
 
-            tr.querySelector('.btn-up').onclick = function () { move(id, -1); };
-            tr.querySelector('.btn-down').onclick = function () { move(id, 1); };
-
             /* 上传图标 */
             tr.querySelector('.btn-upload').onclick = function () {
                 var fi = document.createElement('input');
@@ -814,19 +857,6 @@
                 };
                 fi.click();
             };
-        }
-
-        function move(id, dir) {
-            var idx = data.findIndex(function (x) { return x.id === id; });
-            var to = idx + dir;
-            if (to < 0 || to >= data.length) return;
-            var arr = data.slice();
-            var t = arr[idx]; arr[idx] = arr[to]; arr[to] = t;
-            fetch('/api/admin/reorder', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ids: arr.map(function (x) { return x.id; }) })
-            }).then(function () { load(); });
         }
 
         document.getElementById('btnAdd').onclick = function () {
