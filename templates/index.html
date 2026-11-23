@@ -742,9 +742,10 @@
             .nav-panel { background: var(--panel-bg); }
         }
 
-        /* ===== 桌面：卡片锁视口高度 =====
-           目的：卡片高度不再随服务数量变化 → 左侧照片 cover 的裁切范围恒定，
-           多出来的服务在导航区内部滚动，而不是把整张卡片撑高。 */
+        /* ===== 桌面：卡片有宽高上限 =====
+           目的：① 高度不再随服务数量变化 → 左侧照片 cover 的裁切范围恒定；
+                ② 大屏也不再拉成"宽扁横条"——宽度和高度都有上限，
+                   保持窄长卡的比例（约 900 × 760），导航区约 3 行、超出内滚。 */
         @media (min-width: 992px) {
             body {
                 height: 100dvh;
@@ -753,8 +754,11 @@
             }
 
             .row.my-card {
-                height: calc(100dvh - 48px);
-                max-height: 880px;
+                height: auto;
+                max-width: 900px;
+                max-height: calc(100dvh - 26px);
+                margin-left: auto;
+                margin-right: auto;
             }
 
             .row.my-card > .col-lg-8.card {
@@ -763,7 +767,14 @@
                 min-height: 0;
             }
 
-            .nav-panel { flex: 1 1 auto; }
+            /* 不 grow：卡片高度由内容决定；空间不足时允许收缩并内滚 */
+            .nav-panel {
+                flex: 0 1 auto;
+                min-height: 0;
+            }
+
+            /* 可见约 3 行（97×3 + 组间 gap），再多就滚动 */
+            #links { max-height: 330px; }
 
             .searchBox,
             .poem,
@@ -771,8 +782,6 @@
             .footer { flex: 0 0 auto; }
 
             /* 桌面把上方留白收紧，把高度让给导航区 */
-            .row.my-card { height: calc(100dvh - 26px); }
-
             .poem { margin: 14px 0 12px; }
             .poem .en { line-height: 1.65; }
             .poem .cn { line-height: 1.85; margin-top: 3px; margin-bottom: 11px; }
