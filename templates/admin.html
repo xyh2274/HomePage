@@ -191,10 +191,49 @@
         /* ===== 添加行 ===== */
         .add-row {
             display: grid;
-            grid-template-columns: 42px 1.1fr 1.9fr 110px auto;
+            grid-template-columns: 42px 1.1fr 1.9fr 110px 118px auto;
             gap: 9px;
             align-items: center;
         }
+
+        /* ===== 分组管理 ===== */
+        .group-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .group-row {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 8px 11px;
+            background: var(--item-bg);
+            border: 1px solid var(--item-border);
+            border-radius: 10px;
+        }
+
+        .group-row .gname {
+            flex: 1 1 auto;
+            padding: 6px 9px;
+            font-size: 13px;
+            color: var(--text);
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .group-row .gcount {
+            flex: 0 0 auto;
+            font-size: 11.5px;
+            color: var(--text-soft);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .group-row .ibtn { flex: 0 0 auto; }
+
+        .group-cell { width: 13%; }
 
         /* ===== 文案设置 ===== */
         .settings-grid {
@@ -238,6 +277,33 @@
             border-radius: 9px;
             outline: none;
             transition: border-color .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+        }
+
+        /* 分组下拉 */
+        select {
+            width: 100%;
+            padding: 8px 24px 8px 9px;
+            font-size: 12.5px;
+            color: var(--text);
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 9px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image:
+                linear-gradient(45deg, transparent 50%, var(--text-soft) 50%),
+                linear-gradient(135deg, var(--text-soft) 50%, transparent 50%);
+            background-position: calc(100% - 13px) 52%, calc(100% - 9px) 52%;
+            background-size: 5px 5px, 5px 5px;
+            background-repeat: no-repeat;
+            transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+        }
+
+        select:focus {
+            background-color: var(--input-focus-bg);
+            border-color: rgba(95, 158, 160, 0.62);
+            box-shadow: 0 0 0 3px rgba(95, 158, 160, 0.14);
         }
 
         input[type=text]::placeholder,
@@ -395,9 +461,9 @@
         .ops { display: flex; gap: 5px; align-items: center; }
 
         .color-cell { width: 42px; padding-left: 0; }
-        .name-cell { width: 17%; }
-        .url-cell { width: 36%; }
-        .icon-cell { width: 15%; }
+        .name-cell { width: 14%; }
+        .url-cell { width: 29%; }
+        .icon-cell { width: 16%; }
         .op-cell { width: 190px; padding-right: 0; text-align: right; }
         .op-cell .ops { justify-content: flex-end; }
 
@@ -456,7 +522,8 @@
             .add-row { grid-template-columns: 42px 1fr; gap: 8px; }
             .add-row > *:nth-child(2),
             .add-row > *:nth-child(3),
-            .add-row > *:nth-child(4) { grid-column: 1 / -1; }
+            .add-row > *:nth-child(4),
+            .add-row > *:nth-child(5) { grid-column: 1 / -1; }
 
             /* 添加按钮整行撑满 */
             .add-row > button {
@@ -580,10 +647,23 @@
                 <input type="text" id="newName" placeholder="名称，如 Komga">
                 <input type="url" id="newUrl" placeholder="地址，如 http://192.168.5.105:25600/">
                 <input type="text" id="newIcon" placeholder="图标（可选）">
+                <select id="newGroup"></select>
                 <button id="btnAdd">添加</button>
             </div>
             <p class="hint">
                 图标可填 Font Awesome 类名（<code>fa-book</code>）、图片地址（<code>http://…</code>），留空显示首字。
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>分组</h2>
+            <div class="group-list" id="groupList"></div>
+            <div class="add-row" style="grid-template-columns:1fr auto;margin-top:12px">
+                <input type="text" id="newGroupName" placeholder="新分组名称，如「影音」「创作」" maxlength="40">
+                <button id="btnAddGroup">新建分组</button>
+            </div>
+            <p class="hint">
+                前台可以把图标直接拖到别的分组（拖进「未分组」= 取消归属），松手即保存。
             </p>
         </div>
 
@@ -613,6 +693,7 @@
                         <th class="name-cell">名称</th>
                         <th class="url-cell">地址</th>
                         <th class="icon-cell">图标</th>
+                        <th class="group-cell">分组</th>
                         <th class="op-cell">操作</th>
                     </tr>
                 </thead>
@@ -640,6 +721,7 @@
 
         /* ===== 数据 ===== */
         var data = [];
+        var groups = [];
 
         function esc(s) {
             return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -711,16 +793,100 @@
         }
 
         function load() {
-            fetch('/api/admin/services').then(function (r) { return r.json(); }).then(function (list) {
-                data = list;
+            Promise.all([
+                fetch('/api/admin/services').then(function (r) { return r.json(); }),
+                fetch('/api/groups').then(function (r) { return r.json(); }).catch(function () { return []; })
+            ]).then(function (res) {
+                data = res[0] || [];
+                groups = res[1] || [];
                 render();
+                renderGroups();
+                fillGroupSelects();
             });
         }
+
+        function groupOptions(selected) {
+            var out = ['<option value="">未分组</option>'];
+            groups.forEach(function (g) {
+                out.push('<option value="' + g.id + '"' +
+                    (String(selected) === String(g.id) ? ' selected' : '') + '>' +
+                    esc(g.name) + '</option>');
+            });
+            return out.join('');
+        }
+
+        /* 添加行 + 每行的分组下拉，统一填充 */
+        function fillGroupSelects() {
+            var ng = document.getElementById('newGroup');
+            if (ng) {
+                var cur = ng.value;
+                ng.innerHTML = groupOptions(cur);
+            }
+            Array.prototype.forEach.call(document.querySelectorAll('.f-group'), function (sel) {
+                var cur2 = sel.getAttribute('data-cur');
+                sel.innerHTML = groupOptions(cur2);
+            });
+        }
+
+        function renderGroups() {
+            var box = document.getElementById('groupList');
+            if (!box) return;
+            if (!groups.length) {
+                box.innerHTML = '<p class="hint" style="margin:0">还没有分组 —— 下面新建一个，或者直接在前台页面点「＋ 新建分组」</p>';
+                return;
+            }
+            box.innerHTML = groups.map(function (g) {
+                var n = data.filter(function (s) { return String(s.group_id) === String(g.id); }).length;
+                return '<div class="group-row" data-gid="' + g.id + '">' +
+                    '<input type="text" class="gname" value="' + esc(g.name) + '" maxlength="40">' +
+                    '<span class="gcount">' + n + ' 个</span>' +
+                    '<button class="ibtn g-save" title="保存名称">✓</button>' +
+                    '<button class="ibtn g-del" title="删除分组">✕</button>' +
+                    '</div>';
+            }).join('');
+
+            Array.prototype.forEach.call(box.querySelectorAll('.group-row'), function (row) {
+                var gid = parseInt(row.getAttribute('data-gid'), 10);
+                row.querySelector('.g-save').onclick = function () {
+                    var nm = row.querySelector('.gname').value.trim();
+                    if (!nm) { toast('名称不能为空', false); return; }
+                    fetch('/api/groups/' + gid, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'X-Nav-Edit': '1' },
+                        body: JSON.stringify({ name: nm })
+                    }).then(function (r) {
+                        if (r.ok) { toast('已改名'); load(); } else { toast('保存失败', false); }
+                    });
+                };
+                row.querySelector('.g-del').onclick = function () {
+                    if (!confirm('删除分组「' + row.querySelector('.gname').value + '」？组内服务会回到「未分组」')) return;
+                    fetch('/api/groups/' + gid, {
+                        method: 'DELETE',
+                        headers: { 'X-Nav-Edit': '1' }
+                    }).then(function (r) {
+                        if (r.ok) { toast('已删除'); load(); } else { toast('删除失败', false); }
+                    });
+                };
+            });
+        }
+
+        document.getElementById('btnAddGroup').onclick = function () {
+            var inp = document.getElementById('newGroupName');
+            var nm = inp.value.trim();
+            if (!nm) { toast('请填分组名称', false); return; }
+            fetch('/api/groups', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Nav-Edit': '1' },
+                body: JSON.stringify({ name: nm })
+            }).then(function (r) {
+                if (r.ok) { inp.value = ''; toast('已创建'); load(); } else { toast('创建失败', false); }
+            });
+        };
 
         function render() {
             var tb = document.getElementById('rows');
             if (!data.length) {
-                tb.innerHTML = '<tr><td colspan="5" style="color:var(--text-soft);font-size:13px;padding:16px 0">还没有服务</td></tr>';
+                tb.innerHTML = '<tr><td colspan="6" style="color:var(--text-soft);font-size:13px;padding:16px 0">还没有服务</td></tr>';
                 return;
             }
             tb.innerHTML = data.map(function (s) {
@@ -733,6 +899,9 @@
                     '<input type="text" class="f-icon" value="' + esc(s.icon || '') + '" placeholder="自动">' +
                     '<button class="ibtn btn-upload" title="上传图标">↑</button>' +
                     '</div></td>' +
+                    '<td class="group-cell" data-label="分组">' +
+                    '<select class="f-group" data-cur="' + (s.group_id === null || s.group_id === undefined ? '' : s.group_id) + '"></select>' +
+                    '</td>' +
                     '<td class="op-cell" data-label="操作"><div class="ops">' +
                     '<span class="drag-handle" title="拖动排序">⠿</span>' +
                     '<button class="ibtn save btn-save" title="保存">✓</button>' +
@@ -796,11 +965,13 @@
             });
 
             tr.querySelector('.btn-save').onclick = function () {
+                var gsel = tr.querySelector('.f-group');
                 var payload = {
                     name: tr.querySelector('.f-name').value.trim(),
                     url: tr.querySelector('.f-url').value.trim(),
                     color: tr.querySelector('.f-color').value,
-                    icon: tr.querySelector('.f-icon').value.trim()
+                    icon: tr.querySelector('.f-icon').value.trim(),
+                    group_id: (gsel && gsel.value) ? parseInt(gsel.value, 10) : null
                 };
                 if (!payload.name || !payload.url) { toast('名称和地址不能为空', false); return; }
 
@@ -860,11 +1031,13 @@
         }
 
         document.getElementById('btnAdd').onclick = function () {
+            var ng = document.getElementById('newGroup');
             var payload = {
                 name: document.getElementById('newName').value.trim(),
                 url: document.getElementById('newUrl').value.trim(),
                 color: document.getElementById('newColor').value,
-                icon: document.getElementById('newIcon').value.trim()
+                icon: document.getElementById('newIcon').value.trim(),
+                group_id: (ng && ng.value) ? parseInt(ng.value, 10) : null
             };
             if (!payload.name || !payload.url) { toast('名称和地址不能为空', false); return; }
 

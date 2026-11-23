@@ -54,7 +54,7 @@ DEFAULT_SETTINGS = {
 
 
 def db():
-    con = sqlite3.connect(DB_PATH)
+    con = sqlite3.connect(DB_PATH, timeout=8)
     con.row_factory = sqlite3.Row
     return con
 
@@ -79,6 +79,17 @@ def init_db():
                 value TEXT NOT NULL DEFAULT ''
             )
         """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS groups (
+                id   INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT    NOT NULL,
+                sort INTEGER DEFAULT 0
+            )
+        """)
+        # 兼容旧库：services 表补 group_id 列（NULL = 未分组）
+        cols = [r[1] for r in con.execute("PRAGMA table_info(services)")]
+        if 'group_id' not in cols:
+            con.execute("ALTER TABLE services ADD COLUMN group_id INTEGER")
         for k, v in DEFAULT_SETTINGS.items():
             con.execute("INSERT OR IGNORE INTO settings(key,value) VALUES(?,?)", (k, v))
         con.commit()
@@ -157,6 +168,87 @@ def api_settings():
     return jsonify(get_settings())
 
 
+# ---------------- 分组 / 前台拖拽落库 ----------------
+
+def _edit_ok():
+    """轻量写保护：必须带自定义请求头（避免地址栏误触/表单提交）。
+    内网自用导航页，不做登录校验 —— 但 8889 不要暴露到公网。"""
+    return request.headers.get('X-Nav-Edit') == '1'
+
+
+@app.route('/api/groups', methods=['GET', 'POST'])
+def api_groups():
+    if request.method == 'GET':
+        con = db()
+        rows = con.execute("SELECT * FROM groups ORDER BY sort, id").fetchall()
+        con.close()
+        return jsonify([dict(r) for r in rows])
+
+    if not _edit_ok():
+        return jsonify({'error': 'forbidden'}), 403
+    name = ((request.get_json(force=True) or {}).get('name') or '').strip()
+    if not name:
+        return jsonify({'error': '分组名称必填'}), 400
+    con = db()
+    try:
+        mx = con.execute("SELECT COALESCE(MAX(sort),0) FROM groups").fetchone()[0]
+        cur = con.execute("INSERT INTO groups(name,sort) VALUES(?,?)", (name[:40], mx + 10))
+        con.commit()
+        gid = cur.lastrowid
+    finally:
+        con.close()
+    return jsonify({'id': gid, 'name': name[:40]}), 201
+
+
+@app.route('/api/groups/<int:gid>', methods=['PUT', 'DELETE'])
+def api_group_item(gid):
+    if not _edit_ok():
+        return jsonify({'error': 'forbidden'}), 403
+    con = db()
+    try:
+        if request.method == 'DELETE':
+            con.execute("UPDATE services SET group_id=NULL WHERE group_id=?", (gid,))
+            con.execute("DELETE FROM groups WHERE id=?", (gid,))
+        else:
+            d = request.get_json(force=True) or {}
+            if 'name' in d:
+                nm = (d.get('name') or '').strip()[:40]
+                if nm:
+                    con.execute("UPDATE groups SET name=? WHERE id=?", (nm, gid))
+            if 'sort' in d:
+                con.execute("UPDATE groups SET sort=? WHERE id=?", (int(d['sort']), gid))
+        con.commit()
+    finally:
+        con.close()
+    return jsonify({'ok': True})
+
+
+@app.route('/api/layout', methods=['POST'])
+def api_layout():
+    """前台拖拽后落库：批量写入 [{id, group_id, sort}]"""
+    if not _edit_ok():
+        return jsonify({'error': 'forbidden'}), 403
+    items = (request.get_json(force=True) or {}).get('items') or []
+    con = db()
+    try:
+        for it in items:
+            try:
+                sid = int(it.get('id'))
+            except (TypeError, ValueError):
+                continue
+            gid = it.get('group_id')
+            try:
+                gid = int(gid) if gid not in (None, '', 0, '0') else None
+            except (TypeError, ValueError):
+                gid = None
+            con.execute("UPDATE services SET group_id=?, sort=? WHERE id=?",
+                        (gid, int(it.get('sort') or 0), sid))
+        con.commit()
+    finally:
+        con.close()
+    return jsonify({'ok': True})
+
+
 # ---------------- 管理后台 ----------------
 
 @app.route('/admin')
@@ -184,9 +276,14 @@ def api_create():
         return jsonify({'error': '名称和地址必填'}), 400
     con = db()
     mx = con.execute("SELECT COALESCE(MAX(sort),0) FROM services").fetchone()[0]
+    gid = d.get('group_id')
+    try:
+        gid = int(gid) if gid not in (None, '', 0, '0') else None
+    except (TypeError, ValueError):
+        gid = None
     cur = con.execute(
-        "INSERT INTO services(name,url,color,icon,sort,enabled) VALUES(?,?,?,?,?,1)",
-        (name, url, d.get('color') or '#3385ff', d.get('icon') or '', mx + 10))
+        "INSERT INTO services(name,url,color,icon,sort,enabled,group_id) VALUES(?,?,?,?,?,1,?)",
+        (name, url, d.get('color') or '#3385ff', d.get('icon') or '', mx + 10, gid))
     con.commit()
     sid = cur.lastrowid
     con.close()
@@ -202,6 +299,14 @@ def api_update(sid):
         if k in d:
             fields.append(f"{k}=?")
             vals.append(d[k])
+    if 'group_id' in d:
+        gid = d.get('group_id')
+        try:
+            gid = int(gid) if gid not in (None, '', 0, '0') else None
+        except (TypeError, ValueError):
+            gid = None
+        fields.append("group_id=?")
+        vals.append(gid)
     if 'enabled' in d:
         fields.append("enabled=?")
         vals.append(1 if d['enabled'] else 0)

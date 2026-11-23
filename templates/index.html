@@ -130,7 +130,7 @@
             padding: 0 !important;
             margin: 0 !important;
             background-image: url(/side.jpg) !important;
-            background-position: center center;
+            background-position: center 16%;
             background-size: cover;
             background-repeat: no-repeat;
         }
@@ -265,25 +265,41 @@
             backdrop-filter: blur(3px);
             -webkit-backdrop-filter: blur(3px);
             transition: background .3s ease, border-color .3s ease;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
 
-        /* 超出可视行数时：内容区内部滚动 */
-        .nav-panel.is-scrollable #links {
+        /* 链接区：桌面由卡片剩余高度决定，超出内部滚动（分组后仍是一整块滚动） */
+        #links {
+            width: 100%;
+            min-height: 0;
             overflow-y: auto;
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;          /* 隐藏原生滚动条，用自定义提示条 */
+            scrollbar-width: none;
         }
 
-        .nav-panel.is-scrollable #links::-webkit-scrollbar { display: none; }
+        #links::-webkit-scrollbar { display: none; }
 
-        /* 右侧渐隐竖条：提示"这里还能滚" */
+        /* 可滚动时底部 10px 柔化：只消除硬切线，不遮住图标 */
+        .nav-panel.is-scrollable #links {
+            -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 10px), transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 calc(100% - 10px), transparent 100%);
+        }
+
+        .nav-panel.is-scrollable.at-bottom #links {
+            -webkit-mask-image: none;
+            mask-image: none;
+        }
+
+        /* 右侧渐隐竖条：提示"这里还能滚"（底部让出 foot 按钮的位置） */
         .nav-panel.is-scrollable::before {
             content: '';
             position: absolute;
             right: 4px;
             top: 14px;
-            bottom: 14px;
+            bottom: 46px;
             width: 3px;
             border-radius: 2px;
             background: linear-gradient(to bottom,
@@ -295,47 +311,192 @@
             transition: opacity .25s ease;
         }
 
-        /* 底部箭头：轻微上下浮动 */
-        .nav-panel.is-scrollable::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            bottom: 3px;
-            width: 10px;
-            height: 10px;
-            border-right: 2.5px solid rgba(95, 158, 160, 0.92);
-            border-bottom: 2.5px solid rgba(95, 158, 160, 0.92);
-            transform: translateX(-50%) rotate(45deg);
-            animation: navBob 1.8s ease-in-out infinite;
-            pointer-events: none;
-            transition: opacity .25s ease;
-        }
-
-        @keyframes navBob {
-            0%, 100% { transform: translateX(-50%) rotate(45deg) translateY(0); opacity: .45; }
-            50%      { transform: translateX(-50%) rotate(45deg) translateY(4px); opacity: 1; }
-        }
-
         /* 滚到底：提示全部淡出 */
-        .nav-panel.at-bottom::before,
-        .nav-panel.at-bottom::after {
+        .nav-panel.at-bottom::before { opacity: 0; }
+
+        /* ===== 分组列表 ===== */
+        .nav-groups {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-width: 680px;
+            margin: 0 auto;
+            padding-bottom: 4px;
+        }
+
+        .nav-group {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .nav-group + .nav-group { margin-top: 2px; }
+
+        .group-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 6px;
+            min-height: 15px;
+        }
+
+        .group-name {
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            color: var(--text-mid);
+            opacity: .62;
+            white-space: nowrap;
+            outline: none;
+            border-bottom: 1px solid transparent;
+            transition: opacity .2s ease, border-color .2s ease;
+        }
+
+        .nav-group:hover .group-name { opacity: .85; }
+
+        .group-name.editing {
+            opacity: 1;
+            border-bottom-color: rgba(95, 158, 160, 0.7);
+            cursor: text;
+        }
+
+        .group-tools {
+            display: flex;
+            gap: 1px;
             opacity: 0;
+            transition: opacity .2s ease;
+        }
+
+        .nav-group:hover .group-tools { opacity: 1; }
+
+        .g-btn {
+            width: 17px;
+            height: 17px;
+            padding: 0;
+            border: none;
+            border-radius: 4px;
+            background: transparent;
+            color: var(--text-mid);
+            opacity: .55;
+            font-size: 11px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity .15s ease, background .15s ease;
+        }
+
+        .g-btn:hover { opacity: 1; background: var(--hover-bg); }
+
+        .group-line {
+            flex: 1 1 auto;
+            height: 1px;
+            background: linear-gradient(to right,
+                    rgba(95, 158, 160, 0.20) 0%,
+                    rgba(95, 158, 160, 0.02) 100%);
+        }
+
+        .group-count {
+            font-size: 10.5px;
+            color: var(--text-mid);
+            opacity: .38;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* 面板底部：新建分组 */
+        .nav-panel-foot {
+            flex: 0 0 auto;
+            display: flex;
+            justify-content: center;
+            padding-top: 10px;
+        }
+
+        .group-add {
+            padding: 5px 16px;
+            border: 1px dashed rgba(95, 158, 160, 0.5);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.22);
+            color: var(--text-mid);
+            font-size: 11.5px;
+            letter-spacing: .5px;
+            cursor: pointer;
+            opacity: .85;
+            transition: opacity .2s ease, border-color .2s ease, background .2s ease;
+        }
+
+        html[data-theme="dark"] .group-add { background: rgba(255, 255, 255, 0.06); }
+
+        .group-add:hover {
+            opacity: 1;
+            border-color: rgba(95, 158, 160, 0.75);
+            background: var(--hover-bg);
+        }
+
+        .group-new {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .group-new input {
+            width: 120px;
+            height: 24px;
+            padding: 0 9px;
+            border: 1px solid var(--panel-border);
+            border-radius: 999px;
+            background: var(--search-bg);
+            color: var(--search-text);
+            font-size: 11.5px;
+            outline: none;
+        }
+
+        .group-new input::placeholder { color: var(--text-mid); opacity: .45; }
+
+        .group-new button {
+            height: 24px;
+            padding: 0 10px;
+            border: none;
+            border-radius: 999px;
+            font-size: 11.5px;
+            cursor: pointer;
+            background: rgba(95, 158, 160, 0.85);
+            color: #fff;
+        }
+
+        .group-new button.ghost {
+            background: transparent;
+            color: var(--text-mid);
+            opacity: .6;
         }
 
         /* ===== 导航：按行分组 ===== */
-        .nav-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 32px;
-            max-width: 680px;
-            margin: 0 auto;
-        }
-
         .nav-row {
             display: flex;
             justify-content: center;
             gap: 10px;
+            min-height: 0;
         }
+
+        /* 空分组 = 拖拽落点 */
+        .nav-row.empty {
+            min-height: 74px;
+            align-items: center;
+            border: 1px dashed rgba(95, 158, 160, 0.28);
+            border-radius: 12px;
+        }
+
+        .nav-row.empty::after {
+            content: '拖到这里';
+            font-size: 11.5px;
+            letter-spacing: 1px;
+            color: var(--text-mid);
+            opacity: .38;
+        }
+
+        .drag-ghost { opacity: .32; }
+
+        .nav-item.dragging { cursor: grabbing; }
 
         .nav-item {
             flex: 1 1 0;
@@ -544,11 +705,79 @@
             letter-spacing: .5px;
         }
 
+        /* 保存成功：面板边沿轻微闪一下 */
+        .nav-panel.just-saved {
+            border-color: rgba(95, 158, 160, 0.55) !important;
+            box-shadow: var(--panel-shadow), 0 0 0 3px rgba(95, 158, 160, 0.12),
+                        inset 0 1px 0 var(--panel-halo) !important;
+        }
+
+        .nav-toast {
+            position: fixed;
+            left: 50%;
+            bottom: 30px;
+            transform: translate(-50%, 10px);
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 12.5px;
+            letter-spacing: .4px;
+            color: #fff;
+            background: rgba(22, 34, 42, 0.86);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 50;
+            transition: opacity .25s ease, transform .25s ease;
+        }
+
+        .nav-toast.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
         /* ===== 磨砂降级 ===== */
         @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
             .card { background: var(--card-bg) !important; }
             .searchBox { background: var(--search-bg); }
             .nav-panel { background: var(--panel-bg); }
+        }
+
+        /* ===== 桌面：卡片锁视口高度 =====
+           目的：卡片高度不再随服务数量变化 → 左侧照片 cover 的裁切范围恒定，
+           多出来的服务在导航区内部滚动，而不是把整张卡片撑高。 */
+        @media (min-width: 992px) {
+            body {
+                height: 100dvh;
+                min-height: 0;
+                overflow: hidden;
+            }
+
+            .row.my-card {
+                height: calc(100dvh - 48px);
+                max-height: 880px;
+            }
+
+            .row.my-card > .col-lg-8.card {
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+            }
+
+            .nav-panel { flex: 1 1 auto; }
+
+            .searchBox,
+            .poem,
+            .card h4,
+            .footer { flex: 0 0 auto; }
+
+            /* 桌面把上方留白收紧，把高度让给导航区 */
+            .row.my-card { height: calc(100dvh - 26px); }
+
+            .poem { margin: 14px 0 12px; }
+            .poem .en { line-height: 1.65; }
+            .poem .cn { line-height: 1.85; margin-top: 3px; margin-bottom: 11px; }
+            .card h4 { margin-top: 15px !important; }
+            .footer { margin-top: 11px; padding-top: 9px; }
         }
 
         /* ===== 平板及以下 ===== */
@@ -695,8 +924,18 @@
                 </div>
 
                 <div class="nav-panel">
-                    <div id="links" class="nav-grid">
-                        <span style="color:#95a5a6;font-size:13px">加载中…</span>
+                    <div id="links">
+                        <div class="nav-groups" id="groupBox">
+                            <span style="color:#95a5a6;font-size:13px">加载中…</span>
+                        </div>
+                    </div>
+                    <div class="nav-panel-foot">
+                        <button class="group-add" id="groupAdd" type="button">＋ 新建分组</button>
+                        <form class="group-new" id="groupNew" hidden>
+                            <input id="groupNewName" maxlength="40" placeholder="分组名称" autocomplete="off">
+                            <button type="submit">添加</button>
+                            <button type="button" class="ghost" id="groupNewCancel">取消</button>
+                        </form>
                     </div>
                 </div>
 
@@ -743,9 +982,8 @@
         };
 
         applyTheme(root.getAttribute('data-theme') || 'light');
-
         /* ===== 页面文案（诗歌 / 签名），后台可改 ===== */
-        fetch('/api/settings').then(function (r) { return r.json(); }).then(function (s) {
+        function applySettings(s) {
             function set(id, v) {
                 var el = document.getElementById(id);
                 if (el && v !== undefined && v !== null && v !== '') el.textContent = v;
@@ -759,9 +997,9 @@
             /* 第二组诗留空 → 整组隐藏 */
             var p2 = document.getElementById('pair2');
             if (p2 && !s.poem_en_2 && !s.poem_cn_2) p2.style.display = 'none';
-        }).catch(function () { });
+        }
 
-        /* ===== 服务渲染 ===== */
+        /* ===== 基础工具 ===== */
         function esc(s) {
             return String(s).replace(/[&<>"']/g, function (c) {
                 return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -826,10 +1064,12 @@
                 '</a>';
         }
 
+        /* 一行放几个：用面板宽度算（不能用 #links —— 它的宽度由内容决定，
+           拿去算列数会形成"自己算自己"的死循环，最终锁死在最小值） */
         function perRowCount() {
-            var el = document.getElementById('links');
-            var w = el ? el.clientWidth : 0;
-            if (!w) {
+            var panel = document.querySelector('.nav-panel');
+            var w = panel ? panel.clientWidth - 24 : 0;
+            if (w <= 0) {
                 var card = document.querySelector('.card');
                 w = card ? card.clientWidth - 90 : 480;
             }
@@ -848,120 +1088,327 @@
             return out;
         }
 
-        function render(list, status) {
-            var box = document.getElementById('links');
-            if (!list.length) {
-                box.innerHTML = '<span style="color:#95a5a6;font-size:13px">还没有服务，点右下角「管理」添加</span>';
-                return;
-            }
-            /* 个人排序：localStorage 优先，无则按后台 sort */
-            applyLocalOrder(list);
+        /* ===== 全局状态：服务端为唯一真理 ===== */
+        var _list = [];
+        var _status = null;
+        var _groups = [];
+
+        function groupKeyOf(s) {
+            return (s.group_id === null || s.group_id === undefined) ? '' : String(s.group_id);
+        }
+
+        /* 把扁平服务列表按分组拆开；找不到组的 → 未分组 */
+        function buildGroups() {
+            var out = [], byKey = {};
+            _groups.forEach(function (g) {
+                var node = { gid: String(g.id), name: g.name, items: [] };
+                byKey[node.gid] = node;
+                out.push(node);
+            });
+            var loose = { gid: '', name: '未分组', items: [] };
+            _list.forEach(function (s) {
+                var k = groupKeyOf(s);
+                (k && byKey[k] ? byKey[k] : loose).items.push(s);
+            });
+            /* 只要存在真实分组，就保留「未分组」作为拖出落点（即使当前为空）；
+               完全没有分组时也保留它，但渲染时隐藏组头（回到原来的纯网格视觉） */
+            if (loose.items.length || _groups.length) out.push(loose);
+            return out;
+        }
+
+        function groupHtml(g, status) {
             var max = Math.max(2, Math.min(6, perRowCount()));
-            var counts = rowsOf(list.length, max);
+            var counts = rowsOf(g.items.length, max);
             var idx = 0;
-            box.innerHTML = counts.map(function (c) {
-                var row = list.slice(idx, idx + c);
+            var rows = counts.map(function (c) {
+                var row = g.items.slice(idx, idx + c);
                 idx += c;
-                return '<div class="nav-row">' +
+                return '<div class="nav-row' + (row.length ? '' : ' empty') + '">' +
                     row.map(function (s) { return itemHtml(s, status); }).join('') +
                     '</div>';
             }).join('');
 
-            applyScrollLimit(counts.length);
-            initDrag();
+            var tools = g.gid
+                ? '<span class="group-tools">' +
+                    '<button type="button" class="g-btn" data-act="rename" data-gid="' + g.gid + '" title="重命名">✎</button>' +
+                    '<button type="button" class="g-btn" data-act="del" data-gid="' + g.gid + '" title="删除分组">✕</button>' +
+                  '</span>'
+                : '';
+
+            /* 没有自定义分组时，不显示「未分组」这行标题，视觉和原来一致 */
+            var head = (g.gid === '' && _groups.length === 0) ? '' :
+                '<div class="group-head">' +
+                    '<span class="group-name" data-gid="' + g.gid + '">' + esc(g.name) + '</span>' +
+                    tools +
+                    '<span class="group-line"></span>' +
+                    '<span class="group-count">' + g.items.length + '</span>' +
+                '</div>';
+
+            return '<section class="nav-group' + (head ? '' : ' no-head') + '" data-gid="' + g.gid + '">' +
+                head + rows +
+                '</section>';
         }
 
-        /* ===== 前台拖拽排序（个人化：存浏览器本地，不影响他人）===== */
-        function applyLocalOrder(list) {
-            var order = null;
-            try { order = JSON.parse(localStorage.getItem('arco-nav-order') || 'null'); } catch (e) { }
-            if (!Array.isArray(order)) return;
-            var pos = {};
-            order.forEach(function (id, i) { pos[id] = i; });
-            list.sort(function (a, b) {
-                var pa = (pos[a.id] !== undefined) ? pos[a.id] : 9999;
-                var pb = (pos[b.id] !== undefined) ? pos[b.id] : 9999;
-                return pa - pb;
-            });
-        }
+        function render(status) {
+            var box = document.getElementById('groupBox');
+            if (!box) return;
 
-        function initDrag() {
-            if (!window.Sortable) return;
-            Array.prototype.forEach.call(document.querySelectorAll('.nav-row'), function (row) {
-                if (row._sortable) return;
-                row._sortable = Sortable.create(row, {
-                    group: 'nav-sort',
-                    animation: 150,
-                    delay: 150,
-                    delayOnTouchOnly: true,
-                    draggable: '.nav-item',
-                    ghostClass: 'drag-ghost',
-                    onEnd: function () {
-                        var order = Array.prototype.map.call(
-                            document.querySelectorAll('.nav-item[data-id]'),
-                            function (el) { return parseInt(el.getAttribute('data-id'), 10); });
-                        try { localStorage.setItem('arco-nav-order', JSON.stringify(order)); } catch (e) { }
-                        render(_list, _status);
-                    }
-                });
-            });
-        }
-
-        /* 桌面最多 4 行（五列≈20 个），手机最多 2 行（三列=6 个），超出内部滚动 */
-        function applyScrollLimit(rowCount) {
-            var box = document.getElementById('links');
-            var panel = box ? box.parentNode : null;
-            if (!box || !panel) return;
-
-            var mobile = window.innerWidth <= 767;
-            var maxRows = mobile ? 2 : 4;
-
-            panel.classList.remove('is-scrollable', 'at-bottom');
-            box.style.maxHeight = '';
-            box.onscroll = null;
-
-            if (rowCount <= maxRows) return;
-
-            /* 用第 maxRows 行的实际底部位置，比按 item 高度估算准 */
-            var rows = box.querySelectorAll('.nav-row');
-            var h;
-            if (rows.length >= maxRows) {
-                var boxTop = box.getBoundingClientRect().top;
-                var lastBottom = rows[maxRows - 1].getBoundingClientRect().bottom;
-                h = Math.ceil(lastBottom - boxTop) + 12;
-            } else {
-                h = box.scrollHeight;
+            var gs = buildGroups();
+            if (!gs.length) {
+                box.innerHTML = '<span style="color:#95a5a6;font-size:13px">还没有服务，点右下角「管理」添加</span>';
+                return;
             }
 
-            box.style.maxHeight = h + 'px';
-            panel.classList.add('is-scrollable');
+            box.innerHTML = gs.map(function (g) { return groupHtml(g, status); }).join('');
+            bindGroupTools();
+            initDrag();
+            applyScrollState();
+        }
+
+        /* 桌面由卡片高度决定可视区，这里只切换"可滚动"提示；
+           手机/平板不再限制行数，整页自然滚动 */
+        function applyScrollState() {
+            var box = document.getElementById('links');
+            if (!box) return;
+            var panel = box.parentNode;
+            if (!panel) return;
+
+            panel.classList.remove('is-scrollable', 'at-bottom');
 
             box.onscroll = function () {
                 var atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 2;
                 panel.classList.toggle('at-bottom', atBottom);
             };
+
+            /* 等一帧让新写入的 DOM 完成布局，否则量到的是旧高度 */
+            requestAnimationFrame(function () {
+                var over = box.scrollHeight > box.clientHeight + 2;
+                panel.classList.toggle('is-scrollable', over);
+            });
         }
 
-        var _list = [], _status = null;
+        /* ===== 拖拽：组内排序 + 跨组归属 ===== */
+        function initDrag() {
+            if (!window.Sortable) return;
+            Array.prototype.forEach.call(document.querySelectorAll('.nav-row'), function (row) {
+                if (row._sortable) return;
+                row._sortable = Sortable.create(row, {
+                    group: 'nav-items',
+                    animation: 150,
+                    delay: 150,
+                    delayOnTouchOnly: true,
+                    draggable: '.nav-item',
+                    ghostClass: 'drag-ghost',
+                    onEnd: function () { saveLayout(); }
+                });
+            });
+        }
+
+        function collectLayout() {
+            var items = [];
+            Array.prototype.forEach.call(document.querySelectorAll('.nav-group'), function (sec) {
+                var gid = sec.getAttribute('data-gid') || '';
+                Array.prototype.forEach.call(sec.querySelectorAll('.nav-item[data-id]'), function (el, i) {
+                    items.push({
+                        id: parseInt(el.getAttribute('data-id'), 10),
+                        group_id: gid ? parseInt(gid, 10) : null,
+                        sort: i * 10
+                    });
+                });
+            });
+            return items;
+        }
+
+        var _saving = null;
+
+        function saveLayout() {
+            var items = collectLayout();
+            var byId = {};
+            items.forEach(function (it) { byId[it.id] = it; });
+
+            /* 先更新本地状态并重排（让每行数量重新均分） */
+            _list.forEach(function (s) {
+                var it = byId[s.id];
+                if (it) { s.group_id = it.group_id; s.sort = it.sort; }
+            });
+            _list.sort(function (a, b) { return (a.sort || 0) - (b.sort || 0); });
+            render(_status);
+
+            fetch('/api/layout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Nav-Edit': '1' },
+                body: JSON.stringify({ items: items })
+            }).then(function (r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                flashSaved();
+            }).catch(function () {
+                toast('保存失败，重新加载');
+                loadAll();
+            });
+        }
+
+        function flashSaved() {
+            var panel = document.querySelector('.nav-panel');
+            if (!panel) return;
+            panel.classList.add('just-saved');
+            clearTimeout(_saving);
+            _saving = setTimeout(function () { panel.classList.remove('just-saved'); }, 900);
+        }
+
+        /* ===== 分组操作（免登录，带 X-Nav-Edit） ===== */
+        function apiGroups(method, gid, payload) {
+            var url = '/api/groups' + (gid ? '/' + gid : '');
+            return fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json', 'X-Nav-Edit': '1' },
+                body: payload ? JSON.stringify(payload) : undefined
+            }).then(function (r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            });
+        }
+
+        function bindGroupTools() {
+            Array.prototype.forEach.call(document.querySelectorAll('.g-btn'), function (btn) {
+                btn.onclick = function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var gid = parseInt(btn.getAttribute('data-gid'), 10);
+                    if (btn.getAttribute('data-act') === 'del') {
+                        if (!confirm('删除这个分组？组内服务会回到「未分组」')) return;
+                        apiGroups('DELETE', gid).then(function () {
+                            _groups = _groups.filter(function (g) { return g.id !== gid; });
+                            _list.forEach(function (s) { if (s.group_id === gid) s.group_id = null; });
+                            render(_status);
+                        }).catch(function () { toast('删除失败'); });
+                    } else {
+                        startRename(gid);
+                    }
+                };
+            });
+        }
+
+        function startRename(gid) {
+            var el = document.querySelector('.group-name[data-gid="' + gid + '"]');
+            if (!el) return;
+
+            var old = el.textContent;
+            el.setAttribute('contenteditable', 'true');
+            el.classList.add('editing');
+            el.focus();
+
+            var r = document.createRange();
+            r.selectNodeContents(el);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(r);
+
+            var finished = false;
+
+            function done(save) {
+                if (finished) return;
+                finished = true;
+                el.removeAttribute('contenteditable');
+                el.classList.remove('editing');
+
+                var val = (el.textContent || '').trim().slice(0, 40);
+                if (!save || !val || val === old) {
+                    el.textContent = old;
+                    return;
+                }
+                el.textContent = val;
+                apiGroups('PUT', gid, { name: val }).then(function () {
+                    _groups.forEach(function (g) { if (g.id === gid) g.name = val; });
+                }).catch(function () {
+                    el.textContent = old;
+                    toast('重命名失败');
+                });
+            }
+
+            el.onblur = function () { done(true); };
+            el.onkeydown = function (ev) {
+                if (ev.key === 'Enter') { ev.preventDefault(); el.blur(); }
+                else if (ev.key === 'Escape') { ev.preventDefault(); done(false); }
+            };
+        }
+
+        /* ===== 轻提示 ===== */
+        function toast(msg) {
+            var t = document.createElement('div');
+            t.className = 'nav-toast';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            requestAnimationFrame(function () { t.classList.add('show'); });
+            setTimeout(function () {
+                t.classList.remove('show');
+                setTimeout(function () { t.remove(); }, 300);
+            }, 2000);
+        }
+
+        /* ===== 新建分组 ===== */
+        (function initGroupAdd() {
+            var addBtn = document.getElementById('groupAdd');
+            var form = document.getElementById('groupNew');
+            var input = document.getElementById('groupNewName');
+            var cancel = document.getElementById('groupNewCancel');
+            if (!addBtn || !form) return;
+
+            addBtn.onclick = function () {
+                addBtn.hidden = true;
+                form.hidden = false;
+                input.value = '';
+                input.focus();
+            };
+
+            cancel.onclick = function () {
+                form.hidden = true;
+                addBtn.hidden = false;
+            };
+
+            form.onsubmit = function (e) {
+                e.preventDefault();
+                var name = input.value.trim();
+                if (!name) return;
+                apiGroups('POST', null, { name: name }).then(function (g) {
+                    _groups.push(g);
+                    form.hidden = true;
+                    addBtn.hidden = false;
+                    render(_status);
+                    var el = document.querySelector('.nav-group[data-gid="' + g.id + '"]');
+                    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }).catch(function () { toast('创建失败'); });
+            };
+        })();
+
+        /* ===== 加载 ===== */
+        function loadAll() {
+            return Promise.all([
+                fetch('/api/services').then(function (r) { return r.json(); }),
+                fetch('/api/groups').then(function (r) { return r.json(); }),
+                fetch('/api/settings').then(function (r) { return r.json(); }).catch(function () { return {}; })
+            ]).then(function (res) {
+                _list = res[0] || [];
+                _groups = res[1] || [];
+                applySettings(res[2] || {});
+                render(null);
+                return fetch('/api/status').then(function (r) { return r.json(); });
+            }).then(function (st) {
+                _status = st;
+                render(_status);
+            }).catch(function () {
+                document.getElementById('groupBox').innerHTML =
+                    '<span style="color:#e74c3c;font-size:13px">加载服务列表失败</span>';
+            });
+        }
 
         window.addEventListener('resize', function () {
             clearTimeout(window._rt);
             window._rt = setTimeout(function () {
-                if (_list.length) render(_list, _status);
+                if (_list.length) render(_status);
             }, 180);
         });
 
-        fetch('/api/services').then(function (r) { return r.json(); }).then(function (list) {
-            _list = list;
-            render(_list, null);
-            fetch('/api/status').then(function (r) { return r.json(); }).then(function (st) {
-                _status = st;
-                render(_list, _status);
-            }).catch(function () { });
-        }).catch(function () {
-            document.getElementById('links').innerHTML =
-                '<span style="color:#e74c3c;font-size:13px">加载服务列表失败</span>';
-        });
+        loadAll();
     </script>
 </body>
 
